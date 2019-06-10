@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">TODO App</string>
+    <string name="enter_your_task">Enter Your TODO</string>
+    <string name="long_click_to_delete_task">Long click to delete TODO</string>
+    <string name="contact_us_at_t_v_s10123_gmail_com">Contact us at t.v.s10123@gmail.com</string>
+    <string name="vishnu_sanal_t">Vishnu Sanal.T</string>
+    <string name="developed_by">Developed by</string>
+    <string name="o_k">O.K</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_task">Delete TODO</string>
+    <string name="copy_task">Copy TODO</string>
+    <string name="share_task">Share TODO</string>
+    <string name="details">Details</string>
+    <string name="about_the_developer">About the Developer</string>
+    <string name="edit">Edit TODO</string>
+    <string name="export_todos">Export TODOs</string>
+    <string name="import_todos">Import TODOs</string>
+    <string name="quote">Procrastination is the Thief of Time</string>
+    <string name="add_todo">Add TODO</string>
+
+</resources>

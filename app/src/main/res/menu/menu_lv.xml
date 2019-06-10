@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_delete_lv"
+        android:title="@string/delete_task" />
+    <item
+        android:id="@+id/menu_copy_lv"
+        android:title="@string/copy_task" />
+    <item
+        android:id="@+id/menu_share_lv"
+        android:title="@string/share_task" />
+    <item
+        android:id="@+id/menu_edit_lv"
+        android:title="@string/edit" />
+    <item
+        android:id="@+id/menu_details_lv"
+        android:title="@string/details" />
+</menu>
