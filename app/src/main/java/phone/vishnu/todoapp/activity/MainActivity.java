@@ -1,4 +1,4 @@
-package phone.vishnu.todoapp;
+package phone.vishnu.todoapp.activity;
 
 import android.app.AlertDialog;
 import android.content.ClipData;
@@ -34,6 +34,10 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+
+import phone.vishnu.todoapp.R;
+import phone.vishnu.todoapp.database.Database;
+import phone.vishnu.todoapp.fragments.AboutFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -228,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void add_fab_onclick(final View view) {
+
+        view.animate().xBy(10).yBy(10);
 
         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 

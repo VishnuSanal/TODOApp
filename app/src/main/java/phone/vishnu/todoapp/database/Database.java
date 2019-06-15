@@ -1,4 +1,4 @@
-package phone.vishnu.todoapp;
+package phone.vishnu.todoapp.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-class Database extends SQLiteOpenHelper {
+public class Database extends SQLiteOpenHelper {
 
     private static final String TABLE_NAME = "table_name";
     private static final String TASK_COLUMN = "task";
@@ -18,7 +18,7 @@ class Database extends SQLiteOpenHelper {
     private static final String DB_NAME = "Task.db";
     private static final int DB_VER = 1;
 
-    Database(Context context) {
+    public Database(Context context) {
         super(context, DB_NAME, null, DB_VER);
     }
 
@@ -34,7 +34,7 @@ class Database extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    void insert(String task, String date) {
+    public void insert(String task, String date) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -49,7 +49,7 @@ class Database extends SQLiteOpenHelper {
         db.close();
     }
 
-    ArrayList<String> get() {
+    public ArrayList<String> get() {
 
         ArrayList<String> taskarray = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -65,13 +65,13 @@ class Database extends SQLiteOpenHelper {
     }
 
 
-    void delete(String time) {
+    public void delete(String time) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_NAME, TASK_COLUMN + " = ?", new String[]{time});
         db.close();
     }
 
-    void update(String oldTask, String newTask) {
+    public void update(String oldTask, String newTask) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues cv = new ContentValues();
@@ -81,7 +81,7 @@ class Database extends SQLiteOpenHelper {
         db.update(TABLE_NAME, cv, TASK_COLUMN + " = ?", new String[]{oldTask});
     }
 
-    String getdate(String task) {
+    public String getdate(String task) {
 
         String date = "";
 
