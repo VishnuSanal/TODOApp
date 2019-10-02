@@ -1,17 +1,22 @@
 package phone.vishnu.todoapp.activity;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.ContextMenu;
@@ -41,6 +46,7 @@ import phone.vishnu.todoapp.fragments.AboutFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int PERMISSION_REQ_CODE = 1;
     private TextInputEditText e1;
     private ArrayList<String> taskList = new ArrayList<>();
     private ListView lv;
@@ -56,6 +62,12 @@ public class MainActivity extends AppCompatActivity {
         lv = findViewById(R.id.lv);
         loadTask();
         registerForContextMenu(lv);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        generateNoteOnSD(MainActivity.this, "TODO List", db.get());
     }
 
     @Override
@@ -202,12 +214,28 @@ public class MainActivity extends AppCompatActivity {
                     .commit();
         }
         if (item.getItemId() == R.id.id_export) {
-            generateNoteOnSD(MainActivity.this, "TODO List", db.get());
+            requestPermission(1);
+
         }
         if (item.getItemId() == R.id.id_import) {
-            importTodos();
+            requestPermission(2);
+
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void requestPermission(int pos) {
+        if (Build.VERSION.SDK_INT >= 22) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(MainActivity.this, "Please Accept Required Permission", Toast.LENGTH_SHORT).show();
+                }
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+            } else {
+                if (pos == 1) generateNoteOnSD(MainActivity.this, "TODO List", db.get());
+                else if (pos == 2) importTodos();
+            }
+        }
     }
 
     @Override
@@ -354,7 +382,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void generateNoteOnSD(Context context, String sFileName, ArrayList<String> arrayListBody) {
+    public void generateNoteOnSD(Context context, String
+            sFileName, ArrayList<String> arrayListBody) {
         try {
             File root = new File(Environment.getExternalStoragePublicDirectory("Documents"), "TODOs");
             if (!root.exists()) {
@@ -373,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
 
             writer.flush();
             writer.close();
-            Toast.makeText(context, "Saved TODO List to Documents Directory", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "TODOs Exported", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
