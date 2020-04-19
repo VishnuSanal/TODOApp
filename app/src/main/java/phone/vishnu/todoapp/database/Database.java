@@ -15,6 +15,7 @@ public class Database extends SQLiteOpenHelper {
     private static final String TABLE_NAME = "table_name";
     private static final String TASK_COLUMN = "task";
     private static final String DATE_COLUMN = "date";
+    private static final String TARGET_COLUMN = "target";
     private static final String DB_NAME = "Task.db";
     private static final int DB_VER = 1;
 
@@ -24,7 +25,7 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + TABLE_NAME + " (_ID INTEGER PRIMARY KEY AUTOINCREMENT, " + TASK_COLUMN + " TEXT, " + DATE_COLUMN + " TEXT)");
+        db.execSQL("CREATE TABLE " + TABLE_NAME + " (_ID INTEGER PRIMARY KEY AUTOINCREMENT, " + TASK_COLUMN + " TEXT, " + DATE_COLUMN + " TEXT, " + TARGET_COLUMN + " TEXT " + ")");
     }
 
     @Override
@@ -34,7 +35,7 @@ public class Database extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insert(String task, String date) {
+    public void insert(String task, String date, String target) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -43,6 +44,8 @@ public class Database extends SQLiteOpenHelper {
         values.put(TASK_COLUMN, task);
 
         values.put(DATE_COLUMN, date);
+
+        values.put(TARGET_COLUMN, target);
 
         db.insert(TABLE_NAME, null, values);
 
@@ -63,7 +66,6 @@ public class Database extends SQLiteOpenHelper {
         Collections.reverse(taskarray);
         return taskarray;
     }
-
 
     public void delete(String time) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -86,7 +88,6 @@ public class Database extends SQLiteOpenHelper {
         String date = "";
 
         SQLiteDatabase db = this.getReadableDatabase();
-
 
         Cursor cursor;
         cursor = db.query(
@@ -113,4 +114,49 @@ public class Database extends SQLiteOpenHelper {
         return date;
 
     }
+
+    public String getTarget(String task) {
+
+        String target = "";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor cursor;
+        cursor = db.query(
+                TABLE_NAME,
+                new String[]{TASK_COLUMN, TARGET_COLUMN},
+                TARGET_COLUMN + "=?",
+                new String[]{task},
+                null,
+                null,
+                null
+        );
+        cursor.moveToFirst();
+
+        if (!cursor.isAfterLast()) {
+            target = cursor.getString(1);
+        }
+        cursor.close();
+
+        db.close();
+
+        return target;
+
+    }
+
+    public ArrayList<String> getTargetList() {
+
+        ArrayList<String> targetArray = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_NAME, new String[]{TARGET_COLUMN}, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            int index = cursor.getColumnIndex(TARGET_COLUMN);//int
+            targetArray.add(cursor.getString(index));
+        }
+        cursor.close();
+        db.close();
+        Collections.reverse(targetArray);
+        return targetArray;
+    }
+
 }

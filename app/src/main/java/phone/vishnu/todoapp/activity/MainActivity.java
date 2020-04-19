@@ -2,6 +2,7 @@ package phone.vishnu.todoapp.activity;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -12,23 +13,27 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,12 +42,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
 import phone.vishnu.todoapp.R;
 import phone.vishnu.todoapp.database.Database;
 import phone.vishnu.todoapp.fragments.AboutFragment;
+import phone.vishnu.todoapp.helpers.CustomDateTimePicker;
+import phone.vishnu.todoapp.model.Todo;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private String todo;
     private Database db;
     private ArrayAdapter<String> mAdapter;
+    private CustomDateTimePicker custom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,7 +272,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void add_fab_onclick(final View view) {
 
-        view.animate().xBy(10).yBy(10);
+        Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
+        view.startAnimation(shake);
 
         AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 
@@ -273,7 +285,6 @@ public class MainActivity extends AppCompatActivity {
         e1 = new TextInputEditText(MainActivity.this);
         e1.setHint("TODO");
         e1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-
 
         ImageButton button = new ImageButton(MainActivity.this);
         button.setBackgroundColor(getResources().getColor(R.color.colorAccent));
@@ -301,15 +312,49 @@ public class MainActivity extends AppCompatActivity {
         alert.setView(t1);
         alert.setPositiveButton("O.K", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+            public void onClick(final DialogInterface dialogInterface, int i) {
                 todo = e1.getText().toString().trim();
+
 
                 if (todo.isEmpty()) {
                     e1.setError("Please Enter A Value");
                 } else {
-                    db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()));
-                    loadTask();
-                    dialogInterface.dismiss();
+
+                    custom = new CustomDateTimePicker(MainActivity.this,
+                            new CustomDateTimePicker.ICustomDateTimeListener() {
+
+                                @Override
+                                public void onSet(Dialog dialog, Calendar calendarSelected,
+                                                  Date dateSelected, int year, String monthFullName,
+                                                  String monthShortName, int monthNumber, int day,
+                                                  String weekDayFullName, String weekDayShortName,
+                                                  int hour24, int hour12, int min, int sec,
+                                                  String AM_PM) {
+
+                                    String date = (year
+                                            + "-" + (monthNumber + 1) + "-" + calendarSelected.get(Calendar.DAY_OF_MONTH)
+                                            + " " + hour24 + ":" + min
+                                            + ":" + sec);
+
+                                    if (("").equals(date)) {
+                                        Toast.makeText(MainActivity.this, "Please Select A Date", Toast.LENGTH_SHORT).show();
+                                    } else {
+
+                                        Toast.makeText(MainActivity.this, date, Toast.LENGTH_SHORT).show();
+
+                                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
+                                        loadTask();
+                                        dialogInterface.dismiss();
+                                    }
+                                }
+                                @Override
+                                public void onCancel() {
+                                }
+                            });
+                    custom.set24HourFormat(true);
+                    custom.showDialog();
+
+
                 }
             }
         });
@@ -321,19 +366,19 @@ public class MainActivity extends AppCompatActivity {
         });
 
 //      TODO: Keyboard Auto Popping Up
-
         alert.setCancelable(true);
-
-
         alert.show();
     }
 
     private void loadTask() {
 
         db = new Database(MainActivity.this);
-
         taskList = db.get();
-
+        //FIXME: Changed on 17-12-2019
+        ArrayList<Todo> todoArrayList = new ArrayList<>();
+        ArrayList<String> targetList =db.getTargetList();
+        Collections.sort(targetList);
+        //FIXME: Till Here
         if (mAdapter == null) {
 
             mAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.single_item, taskList);
@@ -371,7 +416,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < file.length(); i++) {
 
                 if (line != null) {
-                    db.insert(line.trim(), ("This is an Imported TODO. Imported on " + DateFormat.getDateTimeInstance().format(new Date())));
+                    db.insert(line.trim(), ("This is an Imported TODO. Imported on " + DateFormat.getDateTimeInstance().format(new Date())), "This is an Imported TODO.");
                     loadTask();
                     line = br.readLine();
                 }
@@ -382,8 +427,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void generateNoteOnSD(Context context, String
-            sFileName, ArrayList<String> arrayListBody) {
+    public void generateNoteOnSD(Context context, String sFileName, ArrayList<String> arrayListBody) {
         try {
             File root = new File(Environment.getExternalStoragePublicDirectory("Documents"), "TODOs");
             if (!root.exists()) {
@@ -402,7 +446,6 @@ public class MainActivity extends AppCompatActivity {
 
             writer.flush();
             writer.close();
-            Toast.makeText(context, "TODOs Exported", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
