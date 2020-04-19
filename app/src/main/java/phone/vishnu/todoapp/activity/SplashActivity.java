@@ -19,8 +19,6 @@ public class SplashActivity extends AppCompatActivity {
 
         int SPLASH_TIMEOUT = 1;
 
-        //TODO: Change Timeout
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
