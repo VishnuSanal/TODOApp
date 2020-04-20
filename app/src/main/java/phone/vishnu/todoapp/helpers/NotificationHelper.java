@@ -12,14 +12,13 @@ import androidx.core.app.NotificationCompat;
 import phone.vishnu.todoapp.R;
 import phone.vishnu.todoapp.activity.MainActivity;
 
-public class NotificationHelper {
+class NotificationHelper {
 
     private static final String NOTIFICATION_CHANNEL_ID = "phone.vishnu.todoapp";
     private static final String NOTIFICATION_CHANNEL_NAME = "ReminderNotificationChannel";
     private static final int NOTIFICATION_REQUEST_CODE = 2222;
     private final Context mContext;
     private String mTodo;
-
 
     NotificationHelper(Context context, String todo) {
         mContext = context;
@@ -32,7 +31,7 @@ public class NotificationHelper {
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final PendingIntent resultPendingIntent = PendingIntent.getActivity(mContext, NOTIFICATION_REQUEST_CODE /* Request code */, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent resultPendingIntent = PendingIntent.getActivity(mContext, NOTIFICATION_REQUEST_CODE , intent, 0);
         final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setSmallIcon(R.drawable.ic_drawing)
                 .setAutoCancel(true)
@@ -50,7 +49,7 @@ public class NotificationHelper {
             mNotificationManager.createNotificationChannel(notificationChannel);
         }
         assert mNotificationManager != null;
-        mNotificationManager.notify(NOTIFICATION_REQUEST_CODE /* Request Code */, mBuilder.build());
+        mNotificationManager.notify(NOTIFICATION_REQUEST_CODE , mBuilder.build());
 
     }
 }

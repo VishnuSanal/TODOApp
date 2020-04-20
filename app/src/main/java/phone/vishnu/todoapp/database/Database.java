@@ -54,17 +54,17 @@ public class Database extends SQLiteOpenHelper {
 
     public ArrayList<String> get() {
 
-        ArrayList<String> taskarray = new ArrayList<>();
+        ArrayList<String> todoArray = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_NAME, new String[]{TASK_COLUMN}, null, null, null, null, null);
         while (cursor.moveToNext()) {
             int index = cursor.getColumnIndex(TASK_COLUMN);//int
-            taskarray.add(cursor.getString(index));
+            todoArray.add(cursor.getString(index));
         }
         cursor.close();
         db.close();
-        Collections.reverse(taskarray);
-        return taskarray;
+        Collections.reverse(todoArray);
+        return todoArray;
     }
 
     public void delete(String time) {
@@ -83,28 +83,18 @@ public class Database extends SQLiteOpenHelper {
         db.update(TABLE_NAME, cv, TASK_COLUMN + " = ?", new String[]{oldTask});
     }
 
-    public String getdate(String task) {
+    public String getDate(String todo) {
 
         String date = "";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor;
-        cursor = db.query(
-                TABLE_NAME,
-                new String[]{TASK_COLUMN, DATE_COLUMN},
-                TASK_COLUMN + "=?",
-                new String[]{task},
-                null,
-                null,
-                null
-        );
+        cursor = db.query(TABLE_NAME,new String[]{TASK_COLUMN, DATE_COLUMN},TASK_COLUMN + "=?",new String[]{todo},null,null,null);
         cursor.moveToFirst();
 
         if (!cursor.isAfterLast()) {
-
             date = cursor.getString(1);
-
         }
 
         cursor.close();
@@ -115,22 +105,14 @@ public class Database extends SQLiteOpenHelper {
 
     }
 
-    public String getTarget(String task) {
+    public String getTarget(String todo) {
 
         String target = "";
 
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor;
-        cursor = db.query(
-                TABLE_NAME,
-                new String[]{TASK_COLUMN, TARGET_COLUMN},
-                TARGET_COLUMN + "=?",
-                new String[]{task},
-                null,
-                null,
-                null
-        );
+        cursor = db.query(TABLE_NAME,new String[]{TASK_COLUMN, TARGET_COLUMN},TARGET_COLUMN + "=?",new String[]{todo},null,null,null);
         cursor.moveToFirst();
 
         if (!cursor.isAfterLast()) {

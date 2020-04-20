@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +33,7 @@ import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -68,11 +70,11 @@ import phone.vishnu.todoapp.model.Todo;
 public class MainActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
 
     private static final int PERMISSION_REQ_CODE = 1;
+    private static final String TAG = "vishnu";
     private TextInputEditText e1;
-    private ArrayList<String> taskList = new ArrayList<>();
     private ListView lv;
     private String todo = "";
-    private Calendar calendar = Calendar.getInstance();
+    private Calendar calendar = null;
     private Database db;
 
     private ArrayAdapter<String> mAdapter;
@@ -81,9 +83,25 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//        Log.e("vishnu",calendar.toString());
         db = new Database(MainActivity.this);
         lv = findViewById(R.id.lv);
         loadTask();
+/*
+
+        calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        String testString =
+                String.valueOf(calendar.get(Calendar.MINUTE)) +
+                        calendar.get(Calendar.HOUR_OF_DAY) +
+                        calendar.get(Calendar.DAY_OF_MONTH) +
+                        calendar.get(Calendar.MONTH) +
+                        (calendar.get(Calendar.YEAR)) % 100;
+        Log.e("vishnu", String.valueOf(Long.parseLong(testString)));
+        Log.e("vishnu", String.valueOf((int) Long.parseLong(testString)));
+
+*/
+
         registerForContextMenu(lv);
     }
 
@@ -141,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                     .setCancelable(true)
                     .setTitle("TODO Added on:")
-                    .setMessage(db.getdate(key))
+                    .setMessage(db.getDate(key))
                     .setPositiveButton("O.K", null)
                     .create();
             dialog.show();
@@ -283,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     public void add_fab_onclick(final View view) {
 
-        calendar.setTimeInMillis(System.currentTimeMillis());
+//        calendar.setTimeInMillis(System.currentTimeMillis());
 
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
         view.startAnimation(shake);
@@ -299,34 +317,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         e1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         t1.addView(e1);
 
-        LinearLayout linearLayout = new LinearLayout(alert.getContext());
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setPadding(24, 12, 24, 4);
 
-
-        Button timeButton = new Button(this);
-        timeButton.setText("Choose Time");
-        timeButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        timeButton.setTextColor(Color.WHITE);
-        timeButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 80));
-        timeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimePickerDialog();
-            }
-        });
-
-        Button dateButton = new Button(this);
-        dateButton.setText("Choose Date");
-        dateButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        dateButton.setTextColor(Color.WHITE);
-        dateButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 80));
-        dateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
 
         ImageButton voiceButton = new ImageButton(MainActivity.this);
         voiceButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
@@ -348,6 +339,41 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             }
         });
 
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80);
+        layoutParams.setMargins(0,12,0,12);
+
+        Button timeButton = new Button(this);
+        timeButton.setText("Choose Time");
+        timeButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        timeButton.setTextColor(Color.WHITE);
+        timeButton.setLayoutParams(layoutParams);
+        timeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog();
+            }
+        });
+
+        Button dateButton = new Button(this);
+        dateButton.setText("Choose Date");
+        dateButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        dateButton.setTextColor(Color.WHITE);
+        dateButton.setLayoutParams(layoutParams);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog();
+            }
+        });
+
+        LinearLayout linearLayout = new LinearLayout(alert.getContext());
+        linearLayout.setPadding(24, 12, 24, 4);
+
+        LinearLayout l2 =new LinearLayout(linearLayout.getContext());
+        l2.setOrientation(LinearLayout.HORIZONTAL);
+        l2.addView(t1);
+        l2.addView(voiceButton);
+
         linearLayout.addView(t1);
         linearLayout.addView(voiceButton);
         linearLayout.addView(timeButton);
@@ -363,11 +389,21 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
                 if (todo.isEmpty()) {
                     e1.setError("Please Enter A Value");
                 } else {
-
                     String date = "Not Found";
-                    db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
-                    myAlarm(calendar, todo);
-                    loadTask();
+                    if (null != calendar) {
+
+                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                        loadTask();
+
+                        date = String.valueOf(Calendar.HOUR_OF_DAY) +
+                                calendar.get(calendar.get(Calendar.MINUTE)) +
+                                calendar.get(Calendar.DAY_OF_MONTH) +
+                                calendar.get(Calendar.MONTH);
+                        Log.e(TAG, date);
+
+//                    myAlarm(calendar, todo);
+
+                    }
 //      TODO: Keyboard Auto Popping Up
                 }
             }
@@ -391,6 +427,9 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+
+        if (null == calendar) calendar = Calendar.getInstance();
+
         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
         calendar.set(Calendar.MINUTE, minute);
     }
@@ -405,6 +444,8 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
 
+        if (null == calendar) calendar = Calendar.getInstance();
+
         calendar.set(Calendar.YEAR, year);
         calendar.set(Calendar.MONTH, month);
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -413,24 +454,32 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     private void myAlarm(Calendar calendar, String todo) {
 
-        if (calendar.getTime().compareTo(new Date()) < 0) calendar.add(Calendar.DAY_OF_MONTH, 1);
+        if (null != calendar) {
+            if (calendar.getTime().compareTo(new Date()) < 0)
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
 
-        Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-        intent.putExtra("todo", todo);
-        PendingIntent pendingIntent;
-        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            String testString =
+                    String.valueOf(calendar.get(Calendar.MINUTE)) +
+                            calendar.get(Calendar.HOUR_OF_DAY) +
+                            calendar.get(Calendar.DAY_OF_MONTH) +
+                            calendar.get(Calendar.MONTH);
 
-        if (alarmManager != null) {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
+            intent.putExtra("todo", todo);
+            PendingIntent pendingIntent;
+            pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0 /*Integer.parseInt(testString)*/, intent, 0);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+            if (alarmManager != null) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            }
         }
-
     }
 
     private void loadTask() {
 
         db = new Database(MainActivity.this);
-        taskList = db.get();
+        ArrayList<String> taskList = db.get();
         //FIXME: Changed on 17-12-2019
         ArrayList<Todo> todoArrayList = new ArrayList<>();
         ArrayList<String> targetList = db.getTargetList();
@@ -461,14 +510,22 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
         loadTask();
 
+//        deleteReminder(string);
+
+    }
+
+    private void deleteReminder(String string) {
+        Log.e(TAG, String.valueOf(db.getTarget(String.valueOf(string))));
+
+        String testString = db.getTarget(string);
+
         Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-        intent.putExtra("todo", todo);
+        intent.putExtra("todo", string);
         PendingIntent pendingIntent;
-        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), /*Integer.parseInt(testString)*/0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
         alarmManager.cancel(pendingIntent);
-
     }
 
     private void importTodos() {
