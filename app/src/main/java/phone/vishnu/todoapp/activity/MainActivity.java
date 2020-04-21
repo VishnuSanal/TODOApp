@@ -3,37 +3,33 @@ package phone.vishnu.todoapp.activity;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.PendingIntent;
-import android.app.TimePickerDialog;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.speech.RecognizerIntent;
-import android.text.InputType;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -41,11 +37,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -62,12 +56,10 @@ import java.util.Locale;
 import phone.vishnu.todoapp.R;
 import phone.vishnu.todoapp.database.Database;
 import phone.vishnu.todoapp.fragments.AboutFragment;
-import phone.vishnu.todoapp.helpers.DatePickerFragment;
 import phone.vishnu.todoapp.helpers.NotificationReceiver;
-import phone.vishnu.todoapp.helpers.TimePickerFragment;
 import phone.vishnu.todoapp.model.Todo;
 
-public class MainActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener, DatePickerDialog.OnDateSetListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_REQ_CODE = 1;
     private static final String TAG = "vishnu";
@@ -76,7 +68,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     private String todo = "";
     private Calendar calendar = null;
     private Database db;
-
     private ArrayAdapter<String> mAdapter;
 
     @Override
@@ -120,119 +111,159 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
     @Override
     public boolean onContextItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.menu_delete_lv) {
+        switch (item.getItemId()) {
+            case R.id.menu_delete_lv: {
 
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String key = ((TextView) info.targetView).getText().toString();
-            delete(key);
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                String key = ((TextView) info.targetView).getText().toString();
+                delete(key);
 
-        } else if (item.getItemId() == R.id.menu_copy_lv) {
+                break;
+            }
+            case R.id.menu_copy_lv: {
 
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String key = ((TextView) info.targetView).getText().toString();
-            ClipboardManager clipboard = (ClipboardManager)
-                    getSystemService(Context.CLIPBOARD_SERVICE);
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                String key = ((TextView) info.targetView).getText().toString();
+                ClipboardManager clipboard = (ClipboardManager)
+                        getSystemService(Context.CLIPBOARD_SERVICE);
 
-            ClipData clip = ClipData.newPlainText("Task", key);
+                ClipData clip = ClipData.newPlainText("Task", key);
 
-            clipboard.setPrimaryClip(clip);
+                clipboard.setPrimaryClip(clip);
 
-            Toast.makeText(this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
 
-        } else if (item.getItemId() == R.id.menu_share_lv) {
+                break;
+            }
+            case R.id.menu_share_lv: {
 
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String key = ((TextView) info.targetView).getText().toString();
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                String key = ((TextView) info.targetView).getText().toString();
 
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_SUBJECT, "TODO: ");
-            intent.putExtra(Intent.EXTRA_TEXT, key);
-            startActivity(Intent.createChooser(intent, "Share Using"));
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_SUBJECT, "TODO: ");
+                intent.putExtra(Intent.EXTRA_TEXT, key);
+                startActivity(Intent.createChooser(intent, "Share Using"));
 
-        } else if (item.getItemId() == R.id.menu_details_lv) {
+                break;
+            }
+            case R.id.menu_details_lv: {
 
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            String key = ((TextView) info.targetView).getText().toString();
-
-
-            AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                    .setCancelable(true)
-                    .setTitle("TODO Added on:")
-                    .setMessage(db.getDate(key))
-                    .setPositiveButton("O.K", null)
-                    .create();
-            dialog.show();
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                String key = ((TextView) info.targetView).getText().toString();
 
 
-        } else if (item.getItemId() == R.id.menu_edit_lv) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-            final String key = ((TextView) info.targetView).getText().toString();
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setCancelable(true)
+                        .setTitle("TODO Added on: ")
+                        .setMessage(db.getDate(key))
+                        .setPositiveButton("O.K", null)
+                        .create();
+                dialog.show();
 
 
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                break;
+            }
+            case R.id.menu_edit_lv: {
+                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+                final String key = ((TextView) info.targetView).getText().toString();
 
-            TextInputLayout t1 = new TextInputLayout(this);
-            t1.setHintAnimationEnabled(true);
-            t1.setPadding(24, 12, 24, 4);
-            t1.isHintEnabled();
+                final AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
+                alert.setTitle("Add TODO");
 
-            e1 = new TextInputEditText(this);
+                final View v = LayoutInflater.from(this).inflate(R.layout.dialog_layout, null);
+                alert.setView(v);
 
-            e1.setHint("TODO");
-            e1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+                Button OKBtn = v.findViewById(R.id.todoAddOKBtn), cancelBtn = v.findViewById(R.id.todoAddCancelBtn);
+                ImageView micIV = v.findViewById(R.id.todoAddMicIV);
 
-            ImageButton button = new ImageButton(this);
-            button.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-            button.setImageResource(R.drawable.ic_mic);
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+                final TimePicker timePicker = v.findViewById(R.id.todoAddTimePicker);
+                final DatePicker datePicker = v.findViewById(R.id.todoAddDatePicker);
+                final Switch alarmSwitch = v.findViewById(R.id.todoAddSwitch);
 
-                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
 
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(intent, 10);
-                    } else {
-                        Toast.makeText(MainActivity.this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
+                e1 = v.findViewById(R.id.todoAddTIE);
+                e1.setText(key);
+                OKBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        todo = e1.getText().toString().trim();
+                        String date = "Alarm Not Set";
+
+                        if (todo.isEmpty()) {
+                            e1.setError("Please Enter A Value");
+                        } else {
+                            if (!alarmSwitch.isChecked()) {
+                                db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                                loadTask();
+                                alert.dismiss();
+                            } else if (alarmSwitch.isChecked()) {
+                                calendar = Calendar.getInstance();
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                    calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+                                    calendar.set(Calendar.MINUTE, timePicker.getMinute());
+                                }
+                                calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+                                calendar.set(Calendar.MONTH, datePicker.getMonth());
+                                calendar.set(Calendar.YEAR, datePicker.getYear());
+
+                                date = String.valueOf(calendar.get(Calendar.MINUTE)) +
+                                        calendar.get(Calendar.HOUR_OF_DAY) +
+                                        calendar.get(Calendar.DAY_OF_MONTH) +
+                                        calendar.get(Calendar.MONTH);
+
+                                db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                                loadTask();
+                                myAlarm(calendar, todo);
+                                alert.dismiss();
+                            }
+                        }
                     }
-                }
-            });
-
-            t1.addView(e1);
-            t1.addView(button);
-
-            e1.setText(key);
-            e1.selectAll();
-
-            alert.setTitle("Edit TODO");
-            alert.setView(t1);
-            alert.setPositiveButton("O.K", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    String task = e1.getText().toString();
-
-                    if (task.isEmpty()) {
-                        e1.setError("Please Enter A Value");
-                    } else {
-                        db.update(key, task);
-                        loadTask();
-                        Toast.makeText(MainActivity.this, "Edited TODO: " + key + " to " + task, Toast.LENGTH_SHORT).show();
+                });
+                alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (!isChecked) {
+                            timePicker.setVisibility(View.GONE);
+                            datePicker.setVisibility(View.GONE);
+                        } else {
+                            datePicker.setVisibility(View.VISIBLE);
+                            timePicker.setVisibility(View.VISIBLE);
+                        }
                     }
+                });
+                micIV.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
 
-                    dialogInterface.dismiss();
-                }
-            });
-            alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                }
-            });
-            alert.show();
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                            startActivityForResult(intent, 10);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
 
+
+                cancelBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alert.dismiss();
+                    }
+                });
+
+                alert.setCancelable(true);
+                alert.show();
+
+                break;
+            }
         }
         return true;
     }
@@ -245,21 +276,23 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.id_about) {
-            AboutFragment fragment = AboutFragment.newInstance();
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction()
-                    .add(R.id.constraintLayout, fragment)
-                    .addToBackStack(null)
-                    .commit();
-        }
-        if (item.getItemId() == R.id.id_export) {
-            requestPermission(1);
+        switch (item.getItemId()) {
+            case R.id.id_about:
+                AboutFragment fragment = AboutFragment.newInstance();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentManager.beginTransaction()
+                        .add(R.id.constraintLayout, fragment)
+                        .addToBackStack(null)
+                        .commit();
+                break;
+            case R.id.id_export:
+                requestPermission(1);
 
-        }
-        if (item.getItemId() == R.id.id_import) {
-            requestPermission(2);
+                break;
+            case R.id.id_import:
+                requestPermission(2);
 
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -301,32 +334,98 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
     public void add_fab_onclick(final View view) {
 
-//        calendar.setTimeInMillis(System.currentTimeMillis());
-
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
         view.startAnimation(shake);
 
-        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setTitle("Loading");
+//        progressDialog.show();
 
-        TextInputLayout t1 = new TextInputLayout(MainActivity.this);
-        t1.setHintAnimationEnabled(true);
-        t1.isHintEnabled();
+        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
+        alertBuilder.setTitle("Add TODO");
 
-        e1 = new TextInputEditText(MainActivity.this);
-        e1.setHint("TODO");
-        e1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-        t1.addView(e1);
+        final View v = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_layout, null);
+        alertBuilder.setView(v);
 
+        Button OKBtn = v.findViewById(R.id.todoAddOKBtn), cancelBtn = v.findViewById(R.id.todoAddCancelBtn);
+        ImageView micIV = v.findViewById(R.id.todoAddMicIV);
 
+        final TimePicker timePicker = v.findViewById(R.id.todoAddTimePicker);
+        final DatePicker datePicker = v.findViewById(R.id.todoAddDatePicker);
+        final Switch alarmSwitch = v.findViewById(R.id.todoAddSwitch);
+        e1 = v.findViewById(R.id.todoAddTIE);
 
-        ImageButton voiceButton = new ImageButton(MainActivity.this);
-        voiceButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        voiceButton.setImageResource(R.drawable.ic_mic);
-        voiceButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 80));
-        voiceButton.setOnClickListener(new View.OnClickListener() {
+        alertBuilder.setCancelable(true);
+        final AlertDialog alert = alertBuilder.show();
+
+        datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
+
+//        if (alert.isShowing())progressDialog.dismiss();
+
+        OKBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+                todo = e1.getText().toString().trim();
+                String date = "Alarm Not Set";
+
+                if (todo.isEmpty()) {
+                    e1.setError("Please Enter A Value");
+                } else {
+                    if (!alarmSwitch.isChecked()) {
+                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                        loadTask();
+                        alert.dismiss();
+                    } else if (alarmSwitch.isChecked()) {
+                        calendar = Calendar.getInstance();
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+                            calendar.set(Calendar.MINUTE, timePicker.getMinute());
+                        }
+                        calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+                        calendar.set(Calendar.MONTH, datePicker.getMonth());
+                        calendar.set(Calendar.YEAR, datePicker.getYear());
+
+                        date = String.valueOf(calendar.get(Calendar.MINUTE)) +
+                                calendar.get(Calendar.HOUR_OF_DAY) +
+                                calendar.get(Calendar.DAY_OF_MONTH) +
+                                calendar.get(Calendar.MONTH);
+
+                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                        loadTask();
+                        myAlarm(calendar, todo);
+                        alert.dismiss();
+                    }
+                }
+            }
+        });
+
+
+        alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) {
+                    timePicker.setVisibility(View.GONE);
+                    datePicker.setVisibility(View.GONE);
+                } else {
+                    datePicker.setVisibility(View.VISIBLE);
+                    timePicker.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                alert.dismiss();
+            }
+        });
+
+        micIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
@@ -339,117 +438,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             }
         });
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 80);
-        layoutParams.setMargins(0,12,0,12);
-
-        Button timeButton = new Button(this);
-        timeButton.setText("Choose Time");
-        timeButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        timeButton.setTextColor(Color.WHITE);
-        timeButton.setLayoutParams(layoutParams);
-        timeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showTimePickerDialog();
-            }
-        });
-
-        Button dateButton = new Button(this);
-        dateButton.setText("Choose Date");
-        dateButton.setBackgroundColor(getResources().getColor(R.color.colorAccent));
-        dateButton.setTextColor(Color.WHITE);
-        dateButton.setLayoutParams(layoutParams);
-        dateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePickerDialog();
-            }
-        });
-
-        LinearLayout linearLayout = new LinearLayout(alert.getContext());
-        linearLayout.setPadding(24, 12, 24, 4);
-
-        LinearLayout l2 =new LinearLayout(linearLayout.getContext());
-        l2.setOrientation(LinearLayout.HORIZONTAL);
-        l2.addView(t1);
-        l2.addView(voiceButton);
-
-        linearLayout.addView(t1);
-        linearLayout.addView(voiceButton);
-        linearLayout.addView(timeButton);
-        linearLayout.addView(dateButton);
-
-        alert.setTitle("Add TODO");
-        alert.setView(linearLayout);
-        alert.setPositiveButton("O.K", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialogInterface, int i) {
-                todo = e1.getText().toString().trim();
-
-                if (todo.isEmpty()) {
-                    e1.setError("Please Enter A Value");
-                } else {
-                    String date = "Not Found";
-                    if (null != calendar) {
-
-                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
-                        loadTask();
-
-                        date = String.valueOf(Calendar.HOUR_OF_DAY) +
-                                calendar.get(calendar.get(Calendar.MINUTE)) +
-                                calendar.get(Calendar.DAY_OF_MONTH) +
-                                calendar.get(Calendar.MONTH);
-                        Log.e(TAG, date);
-
-//                    myAlarm(calendar, todo);
-
-                    }
-//      TODO: Keyboard Auto Popping Up
-                }
-            }
-        });
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-        alert.setCancelable(true);
-        alert.show();
-    }
-
-    private void showTimePickerDialog() {
-
-        DialogFragment timePicker = new TimePickerFragment();
-        timePicker.show(getSupportFragmentManager(), "time picker");
-
-    }
-
-    @Override
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-
-        if (null == calendar) calendar = Calendar.getInstance();
-
-        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-        calendar.set(Calendar.MINUTE, minute);
-    }
-
-    private void showDatePickerDialog() {
-
-        DialogFragment datePicker = new DatePickerFragment();
-        datePicker.show(getSupportFragmentManager(), "date picker");
-
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-
-        if (null == calendar) calendar = Calendar.getInstance();
-
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month);
-        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
     }
 
     private void myAlarm(Calendar calendar, String todo) {
@@ -457,12 +445,6 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         if (null != calendar) {
             if (calendar.getTime().compareTo(new Date()) < 0)
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-            String testString =
-                    String.valueOf(calendar.get(Calendar.MINUTE)) +
-                            calendar.get(Calendar.HOUR_OF_DAY) +
-                            calendar.get(Calendar.DAY_OF_MONTH) +
-                            calendar.get(Calendar.MONTH);
 
             Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
             intent.putExtra("todo", todo);
@@ -510,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
 
         loadTask();
 
-//        deleteReminder(string);
+        deleteReminder(string);
 
     }
 
@@ -525,7 +507,9 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
         pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), /*Integer.parseInt(testString)*/0, intent, 0);
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
-        alarmManager.cancel(pendingIntent);
+        if (alarmManager != null) {
+            alarmManager.cancel(pendingIntent);
+        }
     }
 
     private void importTodos() {
@@ -572,5 +556,4 @@ public class MainActivity extends AppCompatActivity implements TimePickerDialog.
             e.printStackTrace();
         }
     }
-
 }

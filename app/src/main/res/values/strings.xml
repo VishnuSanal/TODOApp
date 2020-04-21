@@ -16,6 +16,8 @@
     <string name="export_todos">Export TODOs</string>
     <string name="import_todos">Import TODOs</string>
     <string name="quote">Procrastination is the Thief of Time</string>
-    <string name="add_todo">Add TODO</string>
+    <string name="todo">TODO</string>
+    <string name="alarm">Alarm:</string>
+
 
 </resources>
