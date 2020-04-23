@@ -13,7 +13,6 @@ import phone.vishnu.todoapp.R;
 
 public class AboutFragment extends Fragment {
 
-
     public AboutFragment() {
     }
 
