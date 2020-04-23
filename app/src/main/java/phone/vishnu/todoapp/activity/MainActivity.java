@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -49,7 +48,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 
@@ -57,7 +55,6 @@ import phone.vishnu.todoapp.R;
 import phone.vishnu.todoapp.database.Database;
 import phone.vishnu.todoapp.fragments.AboutFragment;
 import phone.vishnu.todoapp.helpers.NotificationReceiver;
-import phone.vishnu.todoapp.model.Todo;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -154,15 +151,54 @@ public class MainActivity extends AppCompatActivity {
                 String key = ((TextView) info.targetView).getText().toString();
 
 
+                char[] date = String.valueOf(db.getTarget(key)).toCharArray();
+                Calendar c = Calendar.getInstance();
+                c.set(c.get(Calendar.YEAR),
+                        c.get(Calendar.MONTH),
+                        Integer.parseInt(
+                                String.copyValueOf(date, 4, 2)),
+                        Integer.parseInt(
+                                String.copyValueOf(date, 2, 2)),
+                        Integer.parseInt(
+                                String.copyValueOf(date, 0, 2))
+                );
+
+                String dateString = c.get(Calendar.HOUR_OF_DAY) + " : " +
+                        c.get(Calendar.MINUTE) + ", " +
+                        c.get(Calendar.DAY_OF_MONTH) + "/" +
+                        c.get(Calendar.MONTH);
+/*
+                TextView tv1 = new TextView(this);
+                tv1.setText("TODO Added on: ");
+
+                TextView tv2 = new TextView(this);
+                tv2.setText(db.getDate(key));
+
+                TextView tv3 = new TextView(this);
+                tv3.setText("TODO Due on:");
+
+                TextView tv4 = new TextView(this);
+                tv4.setText(dateString);
+
+                LinearLayout layout = new LinearLayout(this);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                layout.setPadding(24, 24, 24, 24);
+                layout.addView(tv1);
+                layout.addView(tv2);
+                layout.addView(tv3);
+                layout.addView(tv4);
+*/
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setCancelable(true)
-                        .setTitle("TODO Added on: ")
-                        .setMessage(db.getDate(key))
+                        .setTitle("Details")
+                        .setMessage("TODO Added on:\n" +
+                                db.getDate(key) + "\n" +
+                                "TODO Due on:\n" +
+                                dateString)
+//                        .setView(layout)
                         .setPositiveButton("O.K", null)
                         .create();
                 dialog.show();
-
-
                 break;
             }
             case R.id.menu_edit_lv: {
@@ -182,6 +218,10 @@ public class MainActivity extends AppCompatActivity {
                 final DatePicker datePicker = v.findViewById(R.id.todoAddDatePicker);
                 final Switch alarmSwitch = v.findViewById(R.id.todoAddSwitch);
 
+                alarmSwitch.setVisibility(View.GONE);
+                timePicker.setVisibility(View.GONE);
+                datePicker.setVisibility(View.GONE);
+
                 datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
 
                 e1 = v.findViewById(R.id.todoAddTIE);
@@ -191,13 +231,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(View view) {
 
                         todo = e1.getText().toString().trim();
-                        String date = "Alarm Not Set";
+                        int date = 0;
 
                         if (todo.isEmpty()) {
                             e1.setError("Please Enter A Value");
                         } else {
                             if (!alarmSwitch.isChecked()) {
-                                db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                                db.update(key, todo.trim());
                                 loadTask();
                                 alert.dismiss();
                             } else if (alarmSwitch.isChecked()) {
@@ -211,14 +251,14 @@ public class MainActivity extends AppCompatActivity {
                                 calendar.set(Calendar.MONTH, datePicker.getMonth());
                                 calendar.set(Calendar.YEAR, datePicker.getYear());
 
-                                date = String.valueOf(calendar.get(Calendar.MINUTE)) +
+                                date = Integer.parseInt(String.valueOf(calendar.get(Calendar.MINUTE)) +
                                         calendar.get(Calendar.HOUR_OF_DAY) +
                                         calendar.get(Calendar.DAY_OF_MONTH) +
-                                        calendar.get(Calendar.MONTH);
+                                        calendar.get(Calendar.MONTH));
 
-                                db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                                db.update(key, todo.trim());
                                 loadTask();
-                                myAlarm(calendar, todo);
+//                                myAlarm(calendar, todo);
                                 alert.dismiss();
                             }
                         }
@@ -337,9 +377,9 @@ public class MainActivity extends AppCompatActivity {
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
         view.startAnimation(shake);
 
-        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressDialog.setTitle("Loading");
+//        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
+//        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//        progressDialog.setTitle("Loading");
 //        progressDialog.show();
 
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
@@ -368,13 +408,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 todo = e1.getText().toString().trim();
-                String date = "Alarm Not Set";
+                int date = 0;
 
                 if (todo.isEmpty()) {
                     e1.setError("Please Enter A Value");
                 } else {
                     if (!alarmSwitch.isChecked()) {
-                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
                         loadTask();
                         alert.dismiss();
                     } else if (alarmSwitch.isChecked()) {
@@ -388,12 +428,13 @@ public class MainActivity extends AppCompatActivity {
                         calendar.set(Calendar.MONTH, datePicker.getMonth());
                         calendar.set(Calendar.YEAR, datePicker.getYear());
 
-                        date = String.valueOf(calendar.get(Calendar.MINUTE)) +
+                        date = Integer.parseInt(String.valueOf(
+                                calendar.get(Calendar.MINUTE)) +
                                 calendar.get(Calendar.HOUR_OF_DAY) +
                                 calendar.get(Calendar.DAY_OF_MONTH) +
-                                calendar.get(Calendar.MONTH);
+                                calendar.get(Calendar.MONTH));
 
-                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), "" + date);
+                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
                         loadTask();
                         myAlarm(calendar, todo);
                         alert.dismiss();
@@ -446,10 +487,15 @@ public class MainActivity extends AppCompatActivity {
             if (calendar.getTime().compareTo(new Date()) < 0)
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
 
+            String timeString =
+                    String.valueOf(calendar.get(Calendar.MINUTE)) +
+                            calendar.get(Calendar.HOUR_OF_DAY) +
+                            calendar.get(Calendar.DAY_OF_MONTH) +
+                            calendar.get(Calendar.MONTH);
+
             Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
             intent.putExtra("todo", todo);
-            PendingIntent pendingIntent;
-            pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 0 /*Integer.parseInt(testString)*/, intent, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), Integer.parseInt(timeString), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
             if (alarmManager != null) {
@@ -459,56 +505,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadTask() {
-
+//          FIXME: Changed on 17-12-2019
+//          ArrayList<Todo> todoArrayList = new ArrayList<>();
+//           ArrayList<String> targetList = db.getTargetList();
+//           Collections.sort(targetList);
+//           FIXME: Till Here
         db = new Database(MainActivity.this);
         ArrayList<String> taskList = db.get();
-        //FIXME: Changed on 17-12-2019
-        ArrayList<Todo> todoArrayList = new ArrayList<>();
-        ArrayList<String> targetList = db.getTargetList();
-        Collections.sort(targetList);
-        //FIXME: Till Here
+
         if (mAdapter == null) {
-
             mAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.single_item, taskList);
-
             lv.setAdapter(mAdapter);
-
         } else {
             mAdapter.clear();
-
             mAdapter.addAll(taskList);
-
             mAdapter.notifyDataSetChanged();
         }
     }
 
     private void delete(String string) {
 
-        db.delete(String.valueOf(string));
-
-        Toast.makeText(MainActivity.this, "Deleting History: " + string, Toast.LENGTH_SHORT).show();
-
-        mAdapter.notifyDataSetChanged();
-
-        loadTask();
-
         deleteReminder(string);
+
+        db.delete(String.valueOf(string));
+        Toast.makeText(MainActivity.this, "Deleting: " + string, Toast.LENGTH_SHORT).show();
+        mAdapter.notifyDataSetChanged();
+        loadTask();
 
     }
 
     private void deleteReminder(String string) {
-        Log.e(TAG, String.valueOf(db.getTarget(String.valueOf(string))));
 
-        String testString = db.getTarget(string);
+        int id = db.getTarget(string);
 
-        Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-        intent.putExtra("todo", string);
-        PendingIntent pendingIntent;
-        pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), /*Integer.parseInt(testString)*/0, intent, 0);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Log.e(TAG, id + "");
+        if (!(0 == id)) {
 
-        if (alarmManager != null) {
-            alarmManager.cancel(pendingIntent);
+            Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
+            intent.putExtra("todo", string);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+            if (alarmManager != null) {
+                alarmManager.cancel(pendingIntent);
+            }
         }
     }
 
@@ -522,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < file.length(); i++) {
 
                 if (line != null) {
-                    db.insert(line.trim(), ("This is an Imported TODO. Imported on " + DateFormat.getDateTimeInstance().format(new Date())), "This is an Imported TODO.");
+                    db.insert(line.trim(), ("This is an Imported TODO. Imported on " + DateFormat.getDateTimeInstance().format(new Date())), 0);
                     loadTask();
                     line = br.readLine();
                 }
