@@ -376,12 +376,10 @@ public class MainActivity extends AppCompatActivity {
 
         Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
         view.startAnimation(shake);
-
 //        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
 //        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 //        progressDialog.setTitle("Loading");
 //        progressDialog.show();
-
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
         alertBuilder.setTitle("Add TODO");
 

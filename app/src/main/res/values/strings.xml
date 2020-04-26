@@ -1,23 +1,27 @@
 <resources>
     <string name="app_name">TODO App</string>
-    <string name="enter_your_task">Enter Your TODO</string>
     <string name="long_click_to_delete_task">Long click to delete TODO</string>
-    <string name="contact_us_at_t_v_s10123_gmail_com">Contact us at t.v.s10123@gmail.com</string>
-    <string name="vishnu_sanal_t">Vishnu Sanal.T</string>
-    <string name="developed_by">Developed by</string>
+
     <string name="o_k">O.K</string>
     <string name="cancel">Cancel</string>
-    <string name="delete_task">Delete TODO</string>
-    <string name="copy_task">Copy TODO</string>
-    <string name="share_task">Share TODO</string>
+
+    <string name="delete_todo">Delete TODO</string>
+    <string name="copy_todo">Copy TODO</string>
+    <string name="share_todo">Share TODO</string>
+    <string name="edit_todo">Edit TODO</string>
     <string name="details">Details</string>
-    <string name="about_the_developer">About the Developer</string>
-    <string name="edit">Edit TODO</string>
+
     <string name="export_todos">Export TODOs</string>
     <string name="import_todos">Import TODOs</string>
-    <string name="quote">Procrastination is the Thief of Time</string>
+    <string name="about">About</string>
+
     <string name="todo">TODO</string>
     <string name="alarm">Alarm:</string>
+    <string name="links">Links</string>
 
+    <string name="send_feedback_to_developer">Send feedback to developer</string>
+    <string name="email_address_of_developer">t.v.s10123@gmail.com</string>
+    <string name="view_source_code_at_github">View source code at GitHub</string>
+    <string name="version">Version: Pre Release(0.9)</string>
 
 </resources>

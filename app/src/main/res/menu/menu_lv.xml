@@ -3,16 +3,16 @@
 
     <item
         android:id="@+id/menu_delete_lv"
-        android:title="@string/delete_task" />
+        android:title="@string/delete_todo" />
     <item
         android:id="@+id/menu_copy_lv"
-        android:title="@string/copy_task" />
+        android:title="@string/copy_todo" />
     <item
         android:id="@+id/menu_share_lv"
-        android:title="@string/share_task" />
+        android:title="@string/share_todo" />
     <item
         android:id="@+id/menu_edit_lv"
-        android:title="@string/edit" />
+        android:title="@string/edit_todo" />
     <item
         android:id="@+id/menu_details_lv"
         android:title="@string/details" />
