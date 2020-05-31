@@ -65,10 +65,11 @@ public class Database extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void update(String oldTask, String newTask) {
+    public void update(String oldTask, String newTask,int date_end) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(TODO_COLUMN, newTask);
+        cv.put(END_DATE_COLUMN, date_end);
         db.update(TABLE_NAME, cv, TODO_COLUMN + " = ?", new String[]{oldTask});
     }
 

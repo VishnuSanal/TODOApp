@@ -1,5 +1,5 @@
 package phone.vishnu.todoapp.model;
-//FIXME: Changed on 17-12-2019
+
 public class Todo {
     private String todo, target;
 

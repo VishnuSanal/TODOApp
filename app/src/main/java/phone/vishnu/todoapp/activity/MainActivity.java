@@ -149,56 +149,48 @@ public class MainActivity extends AppCompatActivity {
 
                 AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
                 String key = ((TextView) info.targetView).getText().toString();
+                String dateString = "";
 
+                //TODO:Handle the Cases of TODOs which does not need alarms, Imported TODOs, and Normal TODOs
 
-                char[] date = String.valueOf(db.getTarget(key)).toCharArray();
-                Calendar c = Calendar.getInstance();
-                c.set(c.get(Calendar.YEAR),
-                        c.get(Calendar.MONTH),
-                        Integer.parseInt(
-                                String.copyValueOf(date, 4, 2)),
-                        Integer.parseInt(
-                                String.copyValueOf(date, 2, 2)),
-                        Integer.parseInt(
-                                String.copyValueOf(date, 0, 2))
-                );
+                if (db.getTarget(key) == 0) {
+                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                            .setCancelable(true)
+                            .setTitle("Details")
+                            .setMessage("TODO Added on:\n" +
+                                    db.getDate(key))
+                            .setPositiveButton("O.K", null)
+                            .create();
+                    dialog.show();
+                } else {
+                    char[] date = String.valueOf(db.getTarget(key)).toCharArray();
+                    Calendar c = Calendar.getInstance();
+                    c.set(c.get(Calendar.YEAR),
+                            c.get(Calendar.MONTH),
+                            Integer.parseInt(
+                                    String.copyValueOf(date, 4, 2)),
+                            Integer.parseInt(
+                                    String.copyValueOf(date, 2, 2)),
+                            Integer.parseInt(
+                                    String.copyValueOf(date, 0, 2))
+                    );
 
-                String dateString = c.get(Calendar.HOUR_OF_DAY) + " : " +
-                        c.get(Calendar.MINUTE) + ", " +
-                        c.get(Calendar.DAY_OF_MONTH) + "/" +
-                        c.get(Calendar.MONTH);
-/*
-                TextView tv1 = new TextView(this);
-                tv1.setText("TODO Added on: ");
+                    dateString = c.get(Calendar.HOUR_OF_DAY) + " : " +
+                            c.get(Calendar.MINUTE) + ", " +
+                            c.get(Calendar.DAY_OF_MONTH) + "/" +
+                            c.get(Calendar.MONTH);
 
-                TextView tv2 = new TextView(this);
-                tv2.setText(db.getDate(key));
-
-                TextView tv3 = new TextView(this);
-                tv3.setText("TODO Due on:");
-
-                TextView tv4 = new TextView(this);
-                tv4.setText(dateString);
-
-                LinearLayout layout = new LinearLayout(this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-                layout.setPadding(24, 24, 24, 24);
-                layout.addView(tv1);
-                layout.addView(tv2);
-                layout.addView(tv3);
-                layout.addView(tv4);
-*/
-                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setCancelable(true)
-                        .setTitle("Details")
-                        .setMessage("TODO Added on:\n" +
-                                db.getDate(key) + "\n" +
-                                "TODO Due on:\n" +
-                                dateString)
-//                        .setView(layout)
-                        .setPositiveButton("O.K", null)
-                        .create();
-                dialog.show();
+                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                            .setCancelable(true)
+                            .setTitle("Details")
+                            .setMessage("TODO Added on:\n" +
+                                    db.getDate(key) + "\n" +
+                                    "TODO Due on:\n" +
+                                    dateString)
+                            .setPositiveButton("O.K", null)
+                            .create();
+                    dialog.show();
+                }
                 break;
             }
             case R.id.menu_edit_lv: {
@@ -224,6 +216,10 @@ public class MainActivity extends AppCompatActivity {
 
                 datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
 
+//                alarmSwitch.setChecked(true);
+//                timePicker.setVisibility(View.VISIBLE);
+//                datePicker.setVisibility(View.VISIBLE);
+
                 e1 = v.findViewById(R.id.todoAddTIE);
                 e1.setText(key);
                 OKBtn.setOnClickListener(new View.OnClickListener() {
@@ -237,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                             e1.setError("Please Enter A Value");
                         } else {
                             if (!alarmSwitch.isChecked()) {
-                                db.update(key, todo.trim());
+                                db.update(key, todo.trim(),date);
                                 loadTask();
                                 alert.dismiss();
                             } else if (alarmSwitch.isChecked()) {
@@ -256,9 +252,12 @@ public class MainActivity extends AppCompatActivity {
                                         calendar.get(Calendar.DAY_OF_MONTH) +
                                         calendar.get(Calendar.MONTH));
 
-                                db.update(key, todo.trim());
+                                db.update(key, todo.trim(),date);
                                 loadTask();
-//                                myAlarm(calendar, todo);
+
+//                                deleteReminder(todo);
+//                                myAlarm(calendar,todo);
+
                                 alert.dismiss();
                             }
                         }
@@ -276,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
                 micIV.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -399,8 +399,6 @@ public class MainActivity extends AppCompatActivity {
 
         datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
 
-//        if (alert.isShowing())progressDialog.dismiss();
-
         OKBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -503,11 +501,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadTask() {
-//          FIXME: Changed on 17-12-2019
-//          ArrayList<Todo> todoArrayList = new ArrayList<>();
-//           ArrayList<String> targetList = db.getTargetList();
-//           Collections.sort(targetList);
-//           FIXME: Till Here
+//          FIXME: Make TODO App OO
         db = new Database(MainActivity.this);
         ArrayList<String> taskList = db.get();
 
@@ -532,15 +526,15 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void deleteReminder(String string) {
+    private void deleteReminder(String todo) {
 
-        int id = db.getTarget(string);
+        int id = db.getTarget(todo);
 
-        Log.e(TAG, id + "");
+//        Log.e(TAG, id + "");
         if (!(0 == id)) {
 
             Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-            intent.putExtra("todo", string);
+            intent.putExtra("todo", todo);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
