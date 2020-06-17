@@ -41,8 +41,6 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sourceCodeTV.setVisibility(View.GONE);
-        //TODO:
         sourceCodeTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
