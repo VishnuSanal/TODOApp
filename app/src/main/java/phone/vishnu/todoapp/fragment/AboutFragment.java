@@ -1,5 +1,4 @@
-package phone.vishnu.todoapp.fragments;
-
+package phone.vishnu.todoapp.fragment;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -27,7 +26,12 @@ public class AboutFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.fragment_about, container, false);
         sourceCodeTV = inflate.findViewById(R.id.aboutPageViewSourceCodeTextView);
         feedbackTV = inflate.findViewById(R.id.aboutPageFeedbackTextView);
@@ -37,6 +41,8 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        sourceCodeTV.setVisibility(View.GONE);
+        //TODO:
         sourceCodeTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -63,4 +69,6 @@ public class AboutFragment extends Fragment {
             startActivity(intent);
         }
     }
+
+
 }

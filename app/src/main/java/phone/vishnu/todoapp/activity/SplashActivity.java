@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import phone.vishnu.todoapp.R;
 
+
 public class SplashActivity extends AppCompatActivity {
 
     @Override
@@ -15,7 +16,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        getSupportActionBar().hide();
+//        getSupportActionBar().hide();
 
         int SPLASH_TIMEOUT = 1;
 
@@ -26,5 +27,7 @@ public class SplashActivity extends AppCompatActivity {
                 finish();
             }
         }, SPLASH_TIMEOUT * 1000);
+
+
     }
 }

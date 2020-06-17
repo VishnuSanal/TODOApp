@@ -1,4 +1,4 @@
-package phone.vishnu.todoapp.helpers;
+package phone.vishnu.todoapp.helper;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.provider.Settings;
 
 import androidx.core.app.NotificationCompat;
 
@@ -18,19 +17,20 @@ import phone.vishnu.todoapp.activity.MainActivity;
 import static androidx.core.app.NotificationCompat.DEFAULT_SOUND;
 import static androidx.core.app.NotificationCompat.DEFAULT_VIBRATE;
 
-class NotificationHelper {
+public class NotificationHelper {
 
-    private static final String NOTIFICATION_CHANNEL_ID = "phone.vishnu.todoapp";
-    private static final String NOTIFICATION_CHANNEL_NAME = "ReminderNotificationChannel";
-    private final Context mContext;
-    private String mTodo;
+    private static final String NOTIFICATION_CHANNEL_ID = "phone.vishnu.shelvestodo";
+    private static final String NOTIFICATION_CHANNEL_NAME = "TODONotificationChannel";
+    private final Context context;
+    private String title, description;
 
-    NotificationHelper(Context context, String todo) {
-        mContext = context;
-        mTodo = todo;
+    public NotificationHelper(Context context, String title, String description) {
+        this.context = context;
+        this.title = title;
+        this.description = description;
     }
 
-    void createNotification() {
+    public void createNotification() {
 
         Calendar calendar = Calendar.getInstance();
         String timeString =
@@ -41,28 +41,33 @@ class NotificationHelper {
 
         int NOTIFICATION_REQUEST_CODE = Integer.parseInt(timeString);
 
-        Intent intent = new Intent(mContext, MainActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        final PendingIntent resultPendingIntent = PendingIntent.getActivity(mContext, NOTIFICATION_REQUEST_CODE, intent, 0);
-        final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
+        final PendingIntent resultPendingIntent = PendingIntent.getActivity(context, NOTIFICATION_REQUEST_CODE, intent, 0);
+
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.setBigContentTitle(title);
+        bigTextStyle.bigText(description);
+
+
+        final NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context);
         mBuilder.setSmallIcon(R.drawable.ic_drawing)
                 .setAutoCancel(true)
                 .setContentIntent(resultPendingIntent)
-                .setContentTitle("TODO")
-                .setContentText(mTodo)
-                .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE) //Important for heads-up notification
-                .setPriority(Notification.PRIORITY_MAX); //Important for heads-up notification
-        ;
+                .setStyle(bigTextStyle)
+                .setContentTitle(title)
+                .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE)
+                .setPriority(Notification.PRIORITY_MAX);
 
-        NotificationManager mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
 
             NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME, importance);
-            notificationChannel.setDescription("This is the notification channel for TODO Alarms");
+            notificationChannel.setDescription("This is the notification channel for TODO Reminders");
             notificationChannel.setShowBadge(true);
             notificationChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
 

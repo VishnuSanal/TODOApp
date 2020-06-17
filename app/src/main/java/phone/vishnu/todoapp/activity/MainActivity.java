@@ -7,305 +7,76 @@ import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.speech.RecognizerIntent;
-import android.util.Log;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
+import java.util.List;
+import java.util.Objects;
 
+import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import phone.vishnu.todoapp.R;
-import phone.vishnu.todoapp.database.Database;
-import phone.vishnu.todoapp.fragments.AboutFragment;
-import phone.vishnu.todoapp.helpers.NotificationReceiver;
+import phone.vishnu.todoapp.adapter.RecyclerViewAdapter;
+import phone.vishnu.todoapp.fragment.AboutFragment;
+import phone.vishnu.todoapp.model.Shelve;
+import phone.vishnu.todoapp.receiver.NotificationReceiver;
+import phone.vishnu.todoapp.viewmodel.ShelveViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int PERMISSION_REQ_CODE = 1;
-    private static final String TAG = "vishnu";
-    private TextInputEditText e1;
-    private ListView lv;
-    private String todo = "";
-    private Calendar calendar = null;
-    private Database db;
-    private ArrayAdapter<String> mAdapter;
+    private static final int ADD_REQUEST_CODE = 1;
+    private static final int EDIT_REQUEST_CODE = 2;
+    private static final int PERMISSION_REQ_CODE = 2222;
+    private ShelveViewModel shelveViewModel;
+    private RecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        Log.e("vishnu",calendar.toString());
-        db = new Database(MainActivity.this);
-        lv = findViewById(R.id.lv);
-        loadTask();
-/*
 
-        calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        String testString =
-                String.valueOf(calendar.get(Calendar.MINUTE)) +
-                        calendar.get(Calendar.HOUR_OF_DAY) +
-                        calendar.get(Calendar.DAY_OF_MONTH) +
-                        calendar.get(Calendar.MONTH) +
-                        (calendar.get(Calendar.YEAR)) % 100;
-        Log.e("vishnu", String.valueOf(Long.parseLong(testString)));
-        Log.e("vishnu", String.valueOf((int) Long.parseLong(testString)));
+//        importNotes();
 
-*/
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        registerForContextMenu(lv);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        generateNoteOnSD(MainActivity.this, "TODO List", db.get());
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        getMenuInflater().inflate(R.menu.menu_lv, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-
-        switch (item.getItemId()) {
-            case R.id.menu_delete_lv: {
-
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                String key = ((TextView) info.targetView).getText().toString();
-                delete(key);
-
-                break;
-            }
-            case R.id.menu_copy_lv: {
-
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                String key = ((TextView) info.targetView).getText().toString();
-                ClipboardManager clipboard = (ClipboardManager)
-                        getSystemService(Context.CLIPBOARD_SERVICE);
-
-                ClipData clip = ClipData.newPlainText("Task", key);
-
-                clipboard.setPrimaryClip(clip);
-
-                Toast.makeText(this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
-
-                break;
-            }
-            case R.id.menu_share_lv: {
-
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                String key = ((TextView) info.targetView).getText().toString();
-
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_SUBJECT, "TODO: ");
-                intent.putExtra(Intent.EXTRA_TEXT, key);
-                startActivity(Intent.createChooser(intent, "Share Using"));
-
-                break;
-            }
-            case R.id.menu_details_lv: {
-
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                String key = ((TextView) info.targetView).getText().toString();
-                String dateString = "";
-
-                //TODO:Handle the Cases of TODOs which does not need alarms, Imported TODOs, and Normal TODOs
-
-                if (db.getTarget(key) == 0) {
-                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                            .setCancelable(true)
-                            .setTitle("Details")
-                            .setMessage("TODO Added on:\n" +
-                                    db.getDate(key))
-                            .setPositiveButton("O.K", null)
-                            .create();
-                    dialog.show();
-                } else {
-                    char[] date = String.valueOf(db.getTarget(key)).toCharArray();
-                    Calendar c = Calendar.getInstance();
-                    c.set(c.get(Calendar.YEAR),
-                            c.get(Calendar.MONTH),
-                            Integer.parseInt(
-                                    String.copyValueOf(date, 4, 2)),
-                            Integer.parseInt(
-                                    String.copyValueOf(date, 2, 2)),
-                            Integer.parseInt(
-                                    String.copyValueOf(date, 0, 2))
-                    );
-
-                    dateString = c.get(Calendar.HOUR_OF_DAY) + " : " +
-                            c.get(Calendar.MINUTE) + ", " +
-                            c.get(Calendar.DAY_OF_MONTH) + "/" +
-                            c.get(Calendar.MONTH);
-
-                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                            .setCancelable(true)
-                            .setTitle("Details")
-                            .setMessage("TODO Added on:\n" +
-                                    db.getDate(key) + "\n" +
-                                    "TODO Due on:\n" +
-                                    dateString)
-                            .setPositiveButton("O.K", null)
-                            .create();
-                    dialog.show();
-                }
-                break;
-            }
-            case R.id.menu_edit_lv: {
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-                final String key = ((TextView) info.targetView).getText().toString();
-
-                final AlertDialog alert = new AlertDialog.Builder(MainActivity.this).create();
-                alert.setTitle("Add TODO");
-
-                final View v = LayoutInflater.from(this).inflate(R.layout.dialog_layout, null);
-                alert.setView(v);
-
-                Button OKBtn = v.findViewById(R.id.todoAddOKBtn), cancelBtn = v.findViewById(R.id.todoAddCancelBtn);
-                ImageView micIV = v.findViewById(R.id.todoAddMicIV);
-
-                final TimePicker timePicker = v.findViewById(R.id.todoAddTimePicker);
-                final DatePicker datePicker = v.findViewById(R.id.todoAddDatePicker);
-                final Switch alarmSwitch = v.findViewById(R.id.todoAddSwitch);
-
-                alarmSwitch.setVisibility(View.GONE);
-                timePicker.setVisibility(View.GONE);
-                datePicker.setVisibility(View.GONE);
-
-                datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
-
-//                alarmSwitch.setChecked(true);
-//                timePicker.setVisibility(View.VISIBLE);
-//                datePicker.setVisibility(View.VISIBLE);
-
-                e1 = v.findViewById(R.id.todoAddTIE);
-                e1.setText(key);
-                OKBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        todo = e1.getText().toString().trim();
-                        int date = 0;
-
-                        if (todo.isEmpty()) {
-                            e1.setError("Please Enter A Value");
-                        } else {
-                            if (!alarmSwitch.isChecked()) {
-                                db.update(key, todo.trim(),date);
-                                loadTask();
-                                alert.dismiss();
-                            } else if (alarmSwitch.isChecked()) {
-                                calendar = Calendar.getInstance();
-
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                    calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
-                                    calendar.set(Calendar.MINUTE, timePicker.getMinute());
-                                }
-                                calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
-                                calendar.set(Calendar.MONTH, datePicker.getMonth());
-                                calendar.set(Calendar.YEAR, datePicker.getYear());
-
-                                date = Integer.parseInt(String.valueOf(calendar.get(Calendar.MINUTE)) +
-                                        calendar.get(Calendar.HOUR_OF_DAY) +
-                                        calendar.get(Calendar.DAY_OF_MONTH) +
-                                        calendar.get(Calendar.MONTH));
-
-                                db.update(key, todo.trim(),date);
-                                loadTask();
-
-//                                deleteReminder(todo);
-//                                myAlarm(calendar,todo);
-
-                                alert.dismiss();
-                            }
-                        }
-                    }
-                });
-                alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (!isChecked) {
-                            timePicker.setVisibility(View.GONE);
-                            datePicker.setVisibility(View.GONE);
-                        } else {
-                            datePicker.setVisibility(View.VISIBLE);
-                            timePicker.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
-
-                micIV.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
-                        if (intent.resolveActivity(getPackageManager()) != null) {
-                            startActivityForResult(intent, 10);
-                        } else {
-                            Toast.makeText(MainActivity.this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-
-                cancelBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        alert.dismiss();
-                    }
-                });
-
-                alert.setCancelable(true);
-                alert.show();
-
-                break;
-            }
-        }
-        return true;
+        setUpRecyclerView();
     }
 
     @Override
@@ -317,169 +88,214 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.id_about:
-                AboutFragment fragment = AboutFragment.newInstance();
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction()
-                        .add(R.id.constraintLayout, fragment)
-                        .addToBackStack(null)
-                        .commit();
+            case R.id.id_about: {
+                getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance()).addToBackStack(null).commit();
                 break;
-            case R.id.id_export:
-                requestPermission(1);
+            }
+            case R.id.id_export: {
 
+                if (isPermissionGranted()) {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            exportNotes(shelveViewModel.getAllShelves().getValue());
+                        }
+                    });
+                } else {
+                    isPermissionGranted();
+                }
                 break;
-            case R.id.id_import:
-                requestPermission(2);
+            }
+            case R.id.id_import: {
+                if (isPermissionGranted()) {
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            importNotes();
 
+                        }
+                    });
+                } else {
+                    isPermissionGranted();
+                }
                 break;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void requestPermission(int pos) {
-        if (Build.VERSION.SDK_INT >= 22) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    Toast.makeText(MainActivity.this, "Please Accept Required Permission", Toast.LENGTH_SHORT).show();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && null != data) {
+            if (requestCode == ADD_REQUEST_CODE) {
+
+                String title = Objects.requireNonNull(data.getExtras()).getString(AddEditActivity.TITLE_EXTRA, "");
+                String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
+                String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
+
+                Shelve shelve = new Shelve(title, description, (dueDate));
+                shelveViewModel.insert(shelve);
+                myAlarm(dueDate, title, description);
+                Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+            } else if (requestCode == EDIT_REQUEST_CODE) {
+
+                int id = Objects.requireNonNull(data.getExtras()).getInt(AddEditActivity.ID_EXTRA, -1);
+
+                if (-1 == id) {
+                    Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
+                } else {
+                    String title = data.getExtras().getString(AddEditActivity.TITLE_EXTRA, "");
+                    String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
+                    String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
+
+                    Shelve shelve = new Shelve(title, description, (dueDate));
+                    shelve.setId(id);
+                    shelveViewModel.update(shelve);
+                    myAlarm(dueDate, title, description);
+                    Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
                 }
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
-            } else {
-                if (pos == 1) generateNoteOnSD(MainActivity.this, "TODO List", db.get());
-                else if (pos == 2) importTodos();
             }
+        } else {
+            Toast.makeText(this, "Changes Not Saved", Toast.LENGTH_SHORT).show();
         }
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onPause() {
+        super.onPause();
+        exportNotes(shelveViewModel.getAllShelves().getValue());
+    }
 
-        if (requestCode == 10) {
-            if (resultCode == RESULT_OK && data != null) {
-                ArrayList<String> arr = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+    private void setUpRecyclerView() {
 
-                String[] split = arr.get(0).split(" ");
-                StringBuilder sb = new StringBuilder();
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
 
-                for (String s : split) {
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
-                    sb.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
+        adapter = new RecyclerViewAdapter();
+        recyclerView.setAdapter(adapter);
 
+        shelveViewModel = new ViewModelProvider(this,
+                new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(ShelveViewModel.class);
+        shelveViewModel.getAllShelves().observe(this, new Observer<List<Shelve>>() {
+            @Override
+            public void onChanged(List<Shelve> shelves) {
+                adapter.submitList(shelves);
+            }
+        });
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+
+                new RecyclerViewSwipeDecorator.Builder(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+                        .addBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.redColor))
+                        .addActionIcon(R.drawable.ic_delete)
+                        .create()
+                        .decorate();
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                deleteReminder(adapter.getShelve(viewHolder.getAdapterPosition()));
+                shelveViewModel.delete(adapter.getShelve(viewHolder.getAdapterPosition()));
+            }
+        }).attachToRecyclerView(recyclerView);
+
+        adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Shelve shelve, int id) {
+
+                switch (id) {
+                    case R.id.todoEditIV: {
+                        Intent i = new Intent(MainActivity.this, AddEditActivity.class);
+                        i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
+                        i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
+                        i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
+                        i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
+
+                        startActivityForResult(i, EDIT_REQUEST_CODE);
+                        break;
+                    }
+                    case R.id.todoShareIV: {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "TODO: ");
+                        intent.putExtra(Intent.EXTRA_TEXT, shelve.getTitle() + "\n" + shelve.getDescription());
+                        startActivity(Intent.createChooser(intent, "Share Using"));
+                        break;
+                    }
+                    case R.id.todoCopyIV: {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("TODO", shelve.getTitle() + "\n" + shelve.getDescription());
+                        clipboard.setPrimaryClip(clip);
+                        Toast.makeText(MainActivity.this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case R.id.todoDetailsIV: {
+                        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                                .setCancelable(true)
+                                .setTitle("Details")
+                                .setMessage("TODO Due on : " + getDueDate(shelve.getDateDue()))
+                                .setPositiveButton("O.K", null)
+                                .create();
+                        dialog.show();
+
+
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
-                e1.setText(String.format("%s %s", e1.getText().toString().trim(), sb.toString().trim()));
+
+            }
+        });
+    }
+
+    private void deleteReminder(Shelve shelve) {
+
+        if (!"".equals(shelve.getDateDue())) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(shelve.getDateDue()));
+
+            String timeString =
+                    String.valueOf(calendar.get(Calendar.MINUTE)) +
+                            calendar.get(Calendar.HOUR_OF_DAY) +
+                            calendar.get(Calendar.DAY_OF_MONTH) +
+                            calendar.get(Calendar.MONTH);
+
+
+            Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
+            intent.putExtra("title", shelve.getTitle());
+            intent.putExtra("description", shelve.getDescription());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), Integer.parseInt(timeString), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+            if (alarmManager != null) {
+                alarmManager.cancel(pendingIntent);
             }
         }
     }
 
-    public void add_fab_onclick(final View view) {
+    private void myAlarm(String timeInMillis, String title, String description) {
 
-        Animation shake = AnimationUtils.loadAnimation(this, R.anim.animate);
-        view.startAnimation(shake);
-//        ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
-//        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//        progressDialog.setTitle("Loading");
-//        progressDialog.show();
-        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
-        alertBuilder.setTitle("Add TODO");
+        if (!Objects.equals(timeInMillis, "")) {
 
-        final View v = LayoutInflater.from(MainActivity.this).inflate(R.layout.dialog_layout, null);
-        alertBuilder.setView(v);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(timeInMillis));
 
-        Button OKBtn = v.findViewById(R.id.todoAddOKBtn), cancelBtn = v.findViewById(R.id.todoAddCancelBtn);
-        ImageView micIV = v.findViewById(R.id.todoAddMicIV);
-
-        final TimePicker timePicker = v.findViewById(R.id.todoAddTimePicker);
-        final DatePicker datePicker = v.findViewById(R.id.todoAddDatePicker);
-        final Switch alarmSwitch = v.findViewById(R.id.todoAddSwitch);
-        e1 = v.findViewById(R.id.todoAddTIE);
-
-        alertBuilder.setCancelable(true);
-        final AlertDialog alert = alertBuilder.show();
-
-        datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
-
-        OKBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                todo = e1.getText().toString().trim();
-                int date = 0;
-
-                if (todo.isEmpty()) {
-                    e1.setError("Please Enter A Value");
-                } else {
-                    if (!alarmSwitch.isChecked()) {
-                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
-                        loadTask();
-                        alert.dismiss();
-                    } else if (alarmSwitch.isChecked()) {
-                        calendar = Calendar.getInstance();
-
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
-                            calendar.set(Calendar.MINUTE, timePicker.getMinute());
-                        }
-                        calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
-                        calendar.set(Calendar.MONTH, datePicker.getMonth());
-                        calendar.set(Calendar.YEAR, datePicker.getYear());
-
-                        date = Integer.parseInt(String.valueOf(
-                                calendar.get(Calendar.MINUTE)) +
-                                calendar.get(Calendar.HOUR_OF_DAY) +
-                                calendar.get(Calendar.DAY_OF_MONTH) +
-                                calendar.get(Calendar.MONTH));
-
-                        db.insert(todo.trim(), DateFormat.getDateTimeInstance().format(new Date()), date);
-                        loadTask();
-                        myAlarm(calendar, todo);
-                        alert.dismiss();
-                    }
-                }
-            }
-        });
-
-
-        alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked) {
-                    timePicker.setVisibility(View.GONE);
-                    datePicker.setVisibility(View.GONE);
-                } else {
-                    datePicker.setVisibility(View.VISIBLE);
-                    timePicker.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alert.dismiss();
-            }
-        });
-
-        micIV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(intent, 10);
-                } else {
-                    Toast.makeText(MainActivity.this, "Your Device Don't Support Speech Input", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-    }
-
-    private void myAlarm(Calendar calendar, String todo) {
-
-        if (null != calendar) {
             if (calendar.getTime().compareTo(new Date()) < 0)
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
 
@@ -490,102 +306,137 @@ public class MainActivity extends AppCompatActivity {
                             calendar.get(Calendar.MONTH);
 
             Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-            intent.putExtra("todo", todo);
+            intent.putExtra("title", title);
+            intent.putExtra("description", description);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), Integer.parseInt(timeString), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
             if (alarmManager != null) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }
+
         }
     }
 
-    private void loadTask() {
-//          FIXME: Make TODO App OO
-        db = new Database(MainActivity.this);
-        ArrayList<String> taskList = db.get();
-
-        if (mAdapter == null) {
-            mAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.single_item, taskList);
-            lv.setAdapter(mAdapter);
-        } else {
-            mAdapter.clear();
-            mAdapter.addAll(taskList);
-            mAdapter.notifyDataSetChanged();
-        }
+    public void addFABClicked(View view) {
+        startActivityForResult(new Intent(MainActivity.this, AddEditActivity.class), ADD_REQUEST_CODE);
     }
 
-    private void delete(String string) {
-
-        deleteReminder(string);
-
-        db.delete(String.valueOf(string));
-        Toast.makeText(MainActivity.this, "Deleting: " + string, Toast.LENGTH_SHORT).show();
-        mAdapter.notifyDataSetChanged();
-        loadTask();
-
-    }
-
-    private void deleteReminder(String todo) {
-
-        int id = db.getTarget(todo);
-
-//        Log.e(TAG, id + "");
-        if (!(0 == id)) {
-
-            Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-            intent.putExtra("todo", todo);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-            if (alarmManager != null) {
-                alarmManager.cancel(pendingIntent);
-            }
-        }
-    }
-
-    private void importTodos() {
-        final File file = new File(Environment.getExternalStoragePublicDirectory("Documents").getAbsolutePath(), "TODOs/TODO List.txt");
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-
-            for (int i = 0; i < file.length(); i++) {
-
-                if (line != null) {
-                    db.insert(line.trim(), ("This is an Imported TODO. Imported on " + DateFormat.getDateTimeInstance().format(new Date())), 0);
-                    loadTask();
-                    line = br.readLine();
-                }
-            }
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void generateNoteOnSD(Context context, String sFileName, ArrayList<String> arrayListBody) {
+    public void exportNotes(List<Shelve> shelves) {
+        String fileName = "TODOs";
         try {
             File root = new File(Environment.getExternalStoragePublicDirectory("Documents"), "TODOs");
             if (!root.exists()) {
                 root.mkdirs();
             }
-            File gpxfile = new File(root, sFileName);
-            FileWriter writer = new FileWriter(gpxfile + ".txt");
+            File file = new File(root, fileName);
+            FileWriter writer = new FileWriter(file + ".txt");
 
-            for (int i = 0; i < arrayListBody.size(); i++) {
-
-                String sBody = arrayListBody.get(i);
-                String value = sBody + "\n";
-                writer.append(value);
-
+            Gson gson = new Gson();
+/*
+            for (Shelve shelve : shelves) {
+                shelve.setId();
             }
+            */
+            String json = gson.toJson(shelves);
+
+            writer.append(json);
 
             writer.flush();
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void importNotes() {
+        final File file = new File(Environment.getExternalStoragePublicDirectory("Documents").getAbsolutePath(), "TODOs/TODOs.txt");
+        String line = "";
+
+        try {
+            InputStream inputStream = new FileInputStream(file);
+
+            if (inputStream != null) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ((receiveString = bufferedReader.readLine()) != null) {
+                    stringBuilder.append(receiveString);
+                }
+
+                inputStream.close();
+                line = stringBuilder.toString();
+
+                if (line != null) {
+
+                    Gson gson = new Gson();
+                    Type type = new TypeToken<List<Shelve>>() {
+                    }.getType();
+                    List<Shelve> shelves = gson.fromJson(line, type);
+
+                    for (Shelve shelve : shelves) {
+                        Shelve s = new Shelve(shelve.getTitle(), shelve.getDescription(), shelve.getDateDue());
+                        shelveViewModel.insert(s);
+                        myAlarm(shelve.getDateDue(), shelve.getTitle(), shelve.getDescription());
+                    }
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getDueDate(String dueDate) {
+        if (!dueDate.equals("")) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(Long.parseLong(dueDate.trim()));
+            dueDate = calendar.get(Calendar.HOUR_OF_DAY) + " : " +
+                    calendar.get(Calendar.MINUTE) + " - " +
+                    calendar.get(Calendar.MONTH) + "/" +
+                    calendar.get(Calendar.DAY_OF_MONTH);
+        }
+        return "TODO Due On: " + dueDate;
+    }
+
+    private boolean isPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 22) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    showPermissionDeniedDialog();
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void showPermissionDeniedDialog() {
+
+        final androidx.appcompat.app.AlertDialog.Builder builder =
+                new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this, R.style.AppCompatAlertDialogStyle);
+        builder.setTitle("Permission Denied");
+        builder.setMessage("Please Accept Permission to Capture Screenshot of the Screen");
+        builder.setCancelable(true);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+
     }
 }

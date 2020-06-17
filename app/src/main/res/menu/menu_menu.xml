@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/id_about"
-        android:title="@string/about" />
-
-    <item
         android:id="@+id/id_export"
         android:title="@string/export_todos" />
 
     <item
         android:id="@+id/id_import"
         android:title="@string/import_todos" />
+
+    <item
+        android:id="@+id/id_about"
+        android:title="@string/about" />
 
 </menu>
