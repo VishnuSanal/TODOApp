@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQ_CODE = 2222;
     private ShelveViewModel shelveViewModel;
     private RecyclerViewAdapter adapter;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                 Shelve shelve = new Shelve(title, description, (dueDate));
                 shelveViewModel.insert(shelve);
                 myAlarm(dueDate, title, description);
+//                recyclerView.scrollToPosition(0);
                 Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             } else if (requestCode == EDIT_REQUEST_CODE) {
 
@@ -168,8 +170,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpRecyclerView() {
-
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
@@ -247,11 +248,10 @@ public class MainActivity extends AppCompatActivity {
                         AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                                 .setCancelable(true)
                                 .setTitle("Details")
-                                .setMessage("TODO Due on : " + getDueDate(shelve.getDateDue()))
+                                .setMessage(getDueDate(shelve.getDateDue()))
                                 .setPositiveButton("O.K", null)
                                 .create();
                         dialog.show();
-
 
                         break;
                     }
@@ -314,7 +314,6 @@ public class MainActivity extends AppCompatActivity {
             if (alarmManager != null) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }
-
         }
     }
 

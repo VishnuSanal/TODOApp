@@ -61,8 +61,9 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
                     calendar.get(Calendar.MINUTE) + " - " +
                     calendar.get(Calendar.MONTH) + "/" +
                     calendar.get(Calendar.DAY_OF_MONTH);
-        }
-        return "TODO Due On: " + dueDate;
+            return dueDate;
+        } else return "Not Set";
+
     }
 
     public Shelve getShelve(int position) {

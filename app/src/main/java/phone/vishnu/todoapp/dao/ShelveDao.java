@@ -23,6 +23,6 @@ public interface ShelveDao {
     @Delete
     void delete(Shelve shelve);
 
-    @Query("SELECT * FROM Shelve")
+    @Query("SELECT * FROM Shelve order by id desc")
     LiveData<List<Shelve>> getAllShelves();
 }

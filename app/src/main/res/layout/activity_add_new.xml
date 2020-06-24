@@ -4,7 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
+    android:scrollbars="vertical"
     tools:context=".activity.AddEditActivity">
+
+    <!--  <androidx.constraintlayout.widget.ConstraintLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content">-->
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/addEditAppbarLayout"
@@ -44,88 +50,109 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.2" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/addTitleTIL"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:hintAnimationEnabled="true"
-        app:hintEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/guidelineOne"
-        tools:ignore="HardcodedText">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/addTitleTIE"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Title"
-            android:inputType="textCapWords"
-            android:maxLines="1" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/addDescriptionTIL"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:hintAnimationEnabled="true"
-        app:hintEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/addTitleTIL"
-        tools:ignore="HardcodedText">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/addDescriptionTIE"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Description"
-            android:inputType="textCapSentences"
-            android:lines="4" />
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Switch
-        android:id="@+id/todoAddSwitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:padding="8dp"
-        android:text="Alarm"
-        android:textAlignment="textStart"
-        android:textColor="@color/colorAccent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/addDescriptionTIL"
-        tools:ignore="HardcodedText" />
-
-    <TimePicker
-        android:id="@+id/todoAddTimePicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:timePickerMode="spinner"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/todoAddDatePicker"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/todoAddSwitch" />
-
-    <DatePicker
-        android:id="@+id/todoAddDatePicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:minDate="04/15/2020"
-        android:spinnersShown="true"
-        android:visibility="gone"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guidelineOne">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/addTitleTIL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:foregroundGravity="center"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="HardcodedText">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/addTitleTIE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Title"
+                    android:inputType="textCapWords"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/addDescriptionTIL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:foregroundGravity="center"
+                app:hintAnimationEnabled="true"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/addTitleTIL"
+                tools:ignore="HardcodedText">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/addDescriptionTIE"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Description"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:scrollbars="vertical" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Switch
+                android:id="@+id/todoAddSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:foregroundGravity="left"
+                android:padding="8dp"
+                android:text="Alarm"
+                android:textAlignment="textStart"
+                android:textColor="@color/colorAccent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/addDescriptionTIL"
+                tools:ignore="HardcodedText" />
+
+            <TimePicker
+                android:id="@+id/todoAddTimePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:foregroundGravity="center"
+                android:timePickerMode="spinner"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/todoAddSwitch" />
+
+            <DatePicker
+                android:id="@+id/todoAddDatePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:foregroundGravity="center"
+                android:minDate="04/15/2020"
+                android:spinnersShown="true"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/todoAddTimePicker" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

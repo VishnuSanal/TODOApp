@@ -34,10 +34,7 @@ public class AddEditActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new);
-        Toolbar toolbar = findViewById(R.id.addEditToolbar);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+
 
         final TimePicker timePicker = findViewById(R.id.todoAddTimePicker);
         final DatePicker datePicker = findViewById(R.id.todoAddDatePicker);
@@ -63,7 +60,12 @@ public class AddEditActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         if (i.hasExtra(ID_EXTRA)) {
+            Toolbar toolbar = findViewById(R.id.addEditToolbar);
             toolbar.setTitle("Edit TODO");
+            setSupportActionBar(toolbar);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+
             saveButton.setImageResource(R.drawable.ic_edit);
 
             titleTIE.setText(i.getStringExtra(TITLE_EXTRA));
@@ -87,7 +89,12 @@ public class AddEditActivity extends AppCompatActivity {
             }
 
         } else {
-            toolbar.setTitle("Add New TODO");
+            Toolbar toolbar = findViewById(R.id.addEditToolbar);
+            toolbar.setTitle("Add TODO");
+            setSupportActionBar(toolbar);
+            Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+
             saveButton.setImageResource(R.drawable.add_note);
         }
 
