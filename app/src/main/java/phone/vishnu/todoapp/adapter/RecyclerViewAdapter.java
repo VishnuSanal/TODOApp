@@ -59,8 +59,8 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
             calendar.setTimeInMillis(Long.parseLong(dueDate.trim()));
             dueDate = calendar.get(Calendar.HOUR_OF_DAY) + " : " +
                     calendar.get(Calendar.MINUTE) + " - " +
-                    calendar.get(Calendar.MONTH) + "/" +
-                    calendar.get(Calendar.DAY_OF_MONTH);
+                    calendar.get(Calendar.DAY_OF_MONTH) + "/" +
+                    calendar.get(Calendar.MONTH) + 1;
             return dueDate;
         } else return "Not Set";
 

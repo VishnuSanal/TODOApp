@@ -154,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
                     Shelve shelve = new Shelve(title, description, (dueDate));
                     shelve.setId(id);
                     shelveViewModel.update(shelve);
+                    /*TODO:
+                    if (!Objects.equals(dueDate, ""))myAlarm(dueDate, title, description);
+                    else deleteReminder(shelve);*/
                     myAlarm(dueDate, title, description);
                     Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
                 }
@@ -332,11 +335,7 @@ public class MainActivity extends AppCompatActivity {
             FileWriter writer = new FileWriter(file + ".txt");
 
             Gson gson = new Gson();
-/*
-            for (Shelve shelve : shelves) {
-                shelve.setId();
-            }
-            */
+
             String json = gson.toJson(shelves);
 
             writer.append(json);
@@ -394,8 +393,8 @@ public class MainActivity extends AppCompatActivity {
             calendar.setTimeInMillis(Long.parseLong(dueDate.trim()));
             dueDate = calendar.get(Calendar.HOUR_OF_DAY) + " : " +
                     calendar.get(Calendar.MINUTE) + " - " +
-                    calendar.get(Calendar.MONTH) + "/" +
-                    calendar.get(Calendar.DAY_OF_MONTH);
+                    calendar.get(Calendar.DAY_OF_MONTH) + "/" +
+                    calendar.get(Calendar.MONTH) + 1;
         }
         return "TODO Due On: " + dueDate;
     }

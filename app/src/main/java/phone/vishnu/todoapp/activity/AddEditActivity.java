@@ -35,7 +35,6 @@ public class AddEditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_new);
 
-
         final TimePicker timePicker = findViewById(R.id.todoAddTimePicker);
         final DatePicker datePicker = findViewById(R.id.todoAddDatePicker);
         final Switch alarmSwitch = findViewById(R.id.todoAddSwitch);
