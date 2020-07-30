@@ -80,10 +80,9 @@ public class AddEditActivity extends AppCompatActivity {
                 Calendar c = Calendar.getInstance();
                 c.setTimeInMillis(Long.parseLong(timeInMillis));
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    timePicker.setHour(c.get(Calendar.HOUR_OF_DAY));
-                    timePicker.setMinute(c.get(Calendar.MINUTE));
-                }
+                timePicker.setHour(c.get(Calendar.HOUR_OF_DAY));
+                timePicker.setMinute(c.get(Calendar.MINUTE));
+
                 datePicker.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DATE));
             }
 

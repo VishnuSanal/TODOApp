@@ -33,7 +33,6 @@ public class Shelve {
         return title;
     }
 
-
     public String getDescription() {
         return description;
     }
@@ -41,5 +40,4 @@ public class Shelve {
     public String getDateDue() {
         return dateDue;
     }
-
 }

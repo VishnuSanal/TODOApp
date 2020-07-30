@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
             dueDate = calendar.get(Calendar.HOUR_OF_DAY) + " : " +
                     calendar.get(Calendar.MINUTE) + " - " +
                     calendar.get(Calendar.DAY_OF_MONTH) + "/" +
-                    calendar.get(Calendar.MONTH) + 1;
+                    (calendar.get(Calendar.MONTH) + 1);
         }
         return "TODO Due On: " + dueDate;
     }
