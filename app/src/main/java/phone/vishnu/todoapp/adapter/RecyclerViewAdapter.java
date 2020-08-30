@@ -63,7 +63,6 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
                     (calendar.get(Calendar.MONTH) + 1);
             return dueDate;
         } else return "Not Set";
-
     }
 
     public Shelve getShelve(int position) {

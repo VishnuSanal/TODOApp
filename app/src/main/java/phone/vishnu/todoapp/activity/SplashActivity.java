@@ -31,7 +31,6 @@ public class SplashActivity extends MaterialIntroActivity {
         }
     }
 
-
     private void showTour() {
         enableLastSlideAlphaExitTransition(true);
 
@@ -136,6 +135,7 @@ public class SplashActivity extends MaterialIntroActivity {
     }
 }
 /* TODO:Do this
+
     private void onSharedIntent() {
 
         if (getIntent().getAction() != null && getIntent().getType() != null) {
