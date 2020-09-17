@@ -211,9 +211,23 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+
                 deleteReminder(adapter.getShelve(viewHolder.getAdapterPosition()));
                 shelveViewModel.delete(adapter.getShelve(viewHolder.getAdapterPosition()));
+
+                /*AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Delete TODO");
+                builder.setIcon(R.drawable.ic_delete);
+                builder.setMessage("This TODO will be permanently deleted");
+                builder.setNegativeButton("Cancel",null);
+                builder.setPositiveButton("O.K", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                builder.create().show();*/
             }
         }).attachToRecyclerView(recyclerView);
 

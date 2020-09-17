@@ -45,8 +45,6 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(@NonNull ShelveHolder holder, int position) {
-//        holder.setIsRecyclable(false);
-
         Shelve currentShelve = getItem(position);
         holder.titleTV.setText(currentShelve.getTitle());
         holder.descriptionTV.setText(currentShelve.getDescription());
