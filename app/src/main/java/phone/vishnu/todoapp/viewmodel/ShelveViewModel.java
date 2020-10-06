@@ -6,7 +6,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import phone.vishnu.todoapp.model.Shelve;
 import phone.vishnu.todoapp.repository.ShelveRepository;
@@ -37,4 +39,15 @@ public class ShelveViewModel extends AndroidViewModel {
     public LiveData<List<Shelve>> getAllShelves() {
         return allShelves;
     }
+
+    public ArrayList<String> getAllTitles() {
+        ArrayList<String> allTitles = new ArrayList<>();
+
+        for (Shelve shelve : Objects.requireNonNull(allShelves.getValue())) {
+            allTitles.add(shelve.getTitle());
+        }
+
+        return allTitles;
+    }
+
 }
