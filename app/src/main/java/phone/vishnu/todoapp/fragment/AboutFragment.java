@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import phone.vishnu.todoapp.BuildConfig;
 import phone.vishnu.todoapp.R;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -40,6 +41,7 @@ public class AboutFragment extends Fragment {
         sourceCodeTV = inflate.findViewById(R.id.aboutPageViewSourceCodeTextView);
         resetTV = inflate.findViewById(R.id.aboutResetSettingsButton);
         feedbackTV = inflate.findViewById(R.id.aboutPageFeedbackTextView);
+        ((TextView) inflate.findViewById(R.id.aboutSampleVersion)).setText(String.format("Version: %s", BuildConfig.VERSION_NAME));
         return inflate;
     }
 
