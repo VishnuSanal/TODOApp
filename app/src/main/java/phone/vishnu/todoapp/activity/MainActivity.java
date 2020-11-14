@@ -34,6 +34,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -82,8 +83,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        importNotes();
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -98,58 +97,70 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.id_export_as_image: {
-
-                if (isPermissionGranted()) {
-                    AsyncTask.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            shareScreenshot(MainActivity.this);
-                        }
-                    });
-                } else {
-                    isPermissionGranted();
-                }
-
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.id_export_as_image) {
+            if (isPermissionGranted()) {
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        shareScreenshot(MainActivity.this);
+                    }
+                });
+            } else {
+                isPermissionGranted();
             }
-            case R.id.id_about: {
-                getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance()).addToBackStack(null).commit();
-                break;
+        } else if (itemId == R.id.id_about) {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance(), "About").addToBackStack(null).commit();
+                setVisibility(false);
             }
-            case R.id.id_export: {
-
-                if (isPermissionGranted()) {
-                    AsyncTask.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            exportNotes(shelveViewModel.getAllShelves().getValue());
-                        }
-                    });
-                } else {
-                    isPermissionGranted();
-                }
-                break;
+        } else if (itemId == R.id.id_export) {
+            if (isPermissionGranted()) {
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        exportNotes(shelveViewModel.getAllShelves().getValue());
+                    }
+                });
+            } else {
+                isPermissionGranted();
             }
-            case R.id.id_import: {
-                if (isPermissionGranted()) {
-                    AsyncTask.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            importNotes();
+        } else if (itemId == R.id.id_import) {
+            if (isPermissionGranted()) {
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        importNotes();
 
-                        }
-                    });
-                } else {
-                    isPermissionGranted();
-                }
-                break;
+                    }
+                });
+            } else {
+                isPermissionGranted();
             }
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void setVisibility(boolean makeVisible) {
+        if (makeVisible) {
+            Objects.requireNonNull(getSupportActionBar()).show();
+            findViewById(R.id.addMainFAB).setVisibility(View.VISIBLE);
+        } else {
+            Objects.requireNonNull(getSupportActionBar()).hide();
+            findViewById(R.id.addMainFAB).setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                if (Objects.equals(fragment.getTag(), "About"))
+                    setVisibility(true);
+            }
+        }
+        super.onBackPressed();
+    }
 
     private void shareScreenshot(Context context) {
 
@@ -198,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(Intent.createChooser(sharingIntent, "Share via"));
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -309,47 +319,27 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Shelve shelve, int id) {
+                if (id == R.id.todoEditIV) {
+                    Intent i = new Intent(MainActivity.this, AddEditActivity.class);
+                    i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
+                    i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
+                    i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
+                    i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
 
-                switch (id) {
-                    case R.id.todoEditIV: {
-                        Intent i = new Intent(MainActivity.this, AddEditActivity.class);
-                        i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
-                        i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
-                        i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
-                        i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
-
-                        startActivityForResult(i, EDIT_REQUEST_CODE);
-                        break;
-                    }
-                    case R.id.todoShareIV: {
-                        Intent intent = new Intent(Intent.ACTION_SEND);
-                        intent.setType("text/plain");
-                        intent.putExtra(Intent.EXTRA_SUBJECT, "TODO: ");
-                        intent.putExtra(Intent.EXTRA_TEXT, shelve.getTitle() + "\n" + shelve.getDescription());
-                        startActivity(Intent.createChooser(intent, "Share Using"));
-                        break;
-                    }
-                    case R.id.todoCopyIV: {
-                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("TODO", shelve.getTitle() + "\n" + shelve.getDescription());
-                        clipboard.setPrimaryClip(clip);
-                        Toast.makeText(MainActivity.this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
-                        break;
-                    }
-                    case R.id.todoDetailsIV: {
-                        AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                                .setCancelable(true)
-                                .setTitle("Details")
-                                .setMessage(getDueDate(shelve.getDateDue()))
-                                .setPositiveButton("O.K", null)
-                                .create();
-                        dialog.show();
-
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
+                    startActivityForResult(i, EDIT_REQUEST_CODE);
+                } else if (id == R.id.todoCopyIV) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("TODO", shelve.getTitle() + "\n" + shelve.getDescription());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(MainActivity.this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
+                } else if (id == R.id.todoDetailsIV) {
+                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                            .setCancelable(true)
+                            .setTitle("Details")
+                            .setMessage(getDueDate(shelve.getDateDue()))
+                            .setPositiveButton("O.K", null)
+                            .create();
+                    dialog.show();
                 }
 
             }

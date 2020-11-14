@@ -76,8 +76,12 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     }
 
     class ShelveHolder extends RecyclerView.ViewHolder {
-        private ImageView editIV, shareIV, detailsIV, copyIV;
-        private TextView titleTV, descriptionTV, dueTV;
+        private final ImageView editIV;
+        private final ImageView detailsIV;
+        private final ImageView copyIV;
+        private final TextView titleTV;
+        private final TextView descriptionTV;
+        private final TextView dueTV;
 
         public ShelveHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,16 +93,6 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
             editIV = itemView.findViewById(R.id.todoEditIV);
             editIV.setColorFilter(R.color.colorAccent);
             editIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
-                        listener.onItemClick(getItem(getAdapterPosition()), v.getId());
-                }
-            });
-
-            shareIV = itemView.findViewById(R.id.todoShareIV);
-            shareIV.setColorFilter(R.color.colorAccent);
-            shareIV.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)

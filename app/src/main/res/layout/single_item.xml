@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="#FFFFFF"
+    app:cardBackgroundColor="@color/BGColor"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp"
     app:cardUseCompatPadding="true">
@@ -16,12 +16,15 @@
 
         <TextView
             android:id="@+id/todoTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="4dp"
-            android:textColor="#000000"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:textAlignment="viewStart"
+            android:textColor="@color/textColor"
             android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@id/todoDescription"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,11 +32,14 @@
 
         <TextView
             android:id="@+id/todoDescription"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
+            android:layout_margin="8dp"
             android:lineSpacingExtra="2sp"
+            android:padding="4dp"
             android:textAlignment="center"
+            android:textColor="@color/spacerColor"
+            app:layout_constraintBottom_toTopOf="@id/todoDue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/todoTitle" />
@@ -42,58 +48,52 @@
             android:id="@+id/todoDue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:drawableStart="@drawable/ic_alarm"
+            android:layout_margin="8dp"
             android:foregroundGravity="center_horizontal"
             android:gravity="center_horizontal"
-            android:textColor="@color/textColor"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0"
+            android:textColor="@color/itemTextColor"
+            app:drawableStartCompat="@drawable/ic_alarm"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/todoDescription" />
+
+        <ImageView
+            android:id="@+id/todoEditIV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:contentDescription="Edit"
+            android:src="@drawable/ic_edit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/todoCopyIV"
+            app:layout_constraintTop_toBottomOf="@id/todoDescription"
+            app:tint="@color/colorAccent"
+            tools:ignore="HardcodedText" />
 
         <ImageView
             android:id="@+id/todoCopyIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:contentDescription="Copy"
             android:src="@drawable/ic_copy"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/todoDetailsIV"
-            app:layout_constraintTop_toBottomOf="@id/todoDue"
+            app:layout_constraintTop_toBottomOf="@id/todoDescription"
+            app:tint="@color/colorAccent"
             tools:ignore="HardcodedText" />
 
         <ImageView
             android:id="@+id/todoDetailsIV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:contentDescription="Details"
             android:src="@drawable/ic_info"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/todoShareIV"
-            app:layout_constraintTop_toBottomOf="@id/todoDue"
-            tools:ignore="HardcodedText" />
-
-        <ImageView
-            android:id="@+id/todoShareIV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Share"
-            android:src="@drawable/ic_share"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/todoEditIV"
-            app:layout_constraintTop_toBottomOf="@id/todoDue"
-            tools:ignore="HardcodedText" />
-
-        <ImageView
-            android:id="@+id/todoEditIV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Edit"
-            android:src="@drawable/ic_edit"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/todoDue"
+            app:layout_constraintTop_toBottomOf="@id/todoDescription"
+            app:tint="@color/colorAccent"
             tools:ignore="HardcodedText" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

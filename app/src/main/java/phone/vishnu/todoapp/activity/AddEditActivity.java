@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.Switch;
 import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -37,7 +37,7 @@ public class AddEditActivity extends AppCompatActivity {
 
         final TimePicker timePicker = findViewById(R.id.todoAddTimePicker);
         final DatePicker datePicker = findViewById(R.id.todoAddDatePicker);
-        final Switch alarmSwitch = findViewById(R.id.todoAddSwitch);
+        final SwitchCompat alarmSwitch = findViewById(R.id.todoAddSwitch);
         datePicker.setMinDate(Calendar.getInstance().getTimeInMillis());
 
         alarmSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

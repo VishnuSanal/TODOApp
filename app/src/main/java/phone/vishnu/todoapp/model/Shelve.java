@@ -9,11 +9,11 @@ public class Shelve {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
-    private String title;
+    private final String title;
 
-    private String description;
+    private final String description;
 
-    private String dateDue;
+    private final String dateDue;
 
     public Shelve(String title, String description, String dateDue) {
         this.title = title;
@@ -39,5 +39,15 @@ public class Shelve {
 
     public String getDateDue() {
         return dateDue;
+    }
+
+    @Override
+    public String toString() {
+        return "Shelve{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", dateDue='" + dateDue + '\'' +
+                '}';
     }
 }
