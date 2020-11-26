@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/BGColorLight"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.MainActivity"
+    tools:ignore="HardcodedText">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/homeAppbarLayout"
@@ -26,6 +27,34 @@
             app:titleTextColor="@color/BGColor" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
+
+    <ImageView
+        android:id="@+id/recyclerViewEmptyHintIV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Home RecyclerView Empty Hint ImageView"
+        android:src="@drawable/ic_drawing"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="@id/recyclerView"
+        app:layout_constraintStart_toStartOf="@id/recyclerView"
+        app:layout_constraintTop_toTopOf="@id/recyclerView" />
+
+    <TextView
+        android:id="@+id/recyclerViewEmptyHintTV"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Home RecyclerView Empty Hint TextVIew"
+        android:fontFamily="casual"
+        android:text="Nothing Here!"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="@id/recyclerViewEmptyHintIV"
+        app:layout_constraintStart_toStartOf="@id/recyclerViewEmptyHintIV"
+        app:layout_constraintTop_toBottomOf="@id/recyclerViewEmptyHintIV" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

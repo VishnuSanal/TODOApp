@@ -319,6 +319,13 @@ public class MainActivity extends AppCompatActivity {
         shelveViewModel.getAllShelves().observe(this, new Observer<List<Shelve>>() {
             @Override
             public void onChanged(List<Shelve> shelves) {
+                if (shelves.size() == 0) {
+                    findViewById(R.id.recyclerViewEmptyHintIV).setVisibility(View.VISIBLE);
+                    findViewById(R.id.recyclerViewEmptyHintTV).setVisibility(View.VISIBLE);
+                } else {
+                    findViewById(R.id.recyclerViewEmptyHintIV).setVisibility(View.GONE);
+                    findViewById(R.id.recyclerViewEmptyHintTV).setVisibility(View.GONE);
+                }
                 adapter.submitList(shelves);
             }
         });
