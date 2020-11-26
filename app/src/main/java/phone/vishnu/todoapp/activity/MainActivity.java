@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -215,15 +216,15 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && null != data) {
             if (requestCode == ADD_REQUEST_CODE) {
-
                 String title = Objects.requireNonNull(data.getExtras()).getString(AddEditActivity.TITLE_EXTRA, "");
                 String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
                 String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
 
                 Shelve shelve = new Shelve(title, description, (dueDate));
                 shelveViewModel.insert(shelve);
-                myAlarm(dueDate, title, description);
+                myAlarm(shelve);
 //                recyclerView.scrollToPosition(0);
+
                 Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
             } else if (requestCode == EDIT_REQUEST_CODE) {
 
@@ -242,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                     /*TODO:
                     if (!Objects.equals(dueDate, ""))myAlarm(dueDate, title, description);
                     else deleteReminder(shelve);*/
-                    myAlarm(dueDate, title, description);
+                    myAlarm(shelve);
                     Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -301,18 +302,8 @@ public class MainActivity extends AppCompatActivity {
                 deleteReminder(adapter.getShelve(viewHolder.getAdapterPosition()));
                 shelveViewModel.delete(adapter.getShelve(viewHolder.getAdapterPosition()));
 
-                /*AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Delete TODO");
-                builder.setIcon(R.drawable.ic_delete);
-                builder.setMessage("This TODO will be permanently deleted");
-                builder.setNegativeButton("Cancel",null);
-                builder.setPositiveButton("O.K", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                showUndoSnackBar(adapter.getShelve(viewHolder.getAdapterPosition()));
 
-                    }
-                });
-                builder.create().show();*/
             }
         }).attachToRecyclerView(recyclerView);
 
@@ -371,12 +362,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void myAlarm(String timeInMillis, String title, String description) {
+    private void myAlarm(Shelve shelve) {
 
-        if (!Objects.equals(timeInMillis, "")) {
+        if (!Objects.equals(shelve.getDateDue(), "")) {
 
             Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(Long.parseLong(timeInMillis));
+            calendar.setTimeInMillis(Long.parseLong(shelve.getDateDue()));
 
             if (calendar.getTime().compareTo(new Date()) < 0)
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
@@ -388,8 +379,8 @@ public class MainActivity extends AppCompatActivity {
                             calendar.get(Calendar.MONTH);
 
             Intent intent = new Intent(getApplicationContext(), NotificationReceiver.class);
-            intent.putExtra("title", title);
-            intent.putExtra("description", description);
+            intent.putExtra("title", shelve.getTitle());
+            intent.putExtra("description", shelve.getTitle());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), Integer.parseInt(timeString), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
 
@@ -397,6 +388,23 @@ public class MainActivity extends AppCompatActivity {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }
         }
+    }
+
+    private void showUndoSnackBar(final Shelve shelveDeleted) {
+        View view = findViewById(R.id.container);
+        Snackbar snackbar = Snackbar.make(view, "TODO Deleted", Snackbar.LENGTH_LONG);
+        snackbar.setAction("Undo", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                undoDelete(shelveDeleted);
+            }
+        });
+        snackbar.show();
+    }
+
+    private void undoDelete(Shelve shelveDeleted) {
+        myAlarm(shelveDeleted);
+        shelveViewModel.insert(shelveDeleted);
     }
 
     public void addFABClicked(View view) {
@@ -456,7 +464,7 @@ public class MainActivity extends AppCompatActivity {
                     for (Shelve shelve : shelves) {
                         Shelve s = new Shelve(shelve.getTitle(), shelve.getDescription(), shelve.getDateDue());
                         shelveViewModel.insert(s);
-                        myAlarm(shelve.getDateDue(), shelve.getTitle(), shelve.getDescription());
+                        myAlarm(shelve);
                     }
 
                 }
