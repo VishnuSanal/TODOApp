@@ -1,7 +1,6 @@
 package phone.vishnu.todoapp.fragment;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -16,8 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import phone.vishnu.todoapp.BuildConfig;
 import phone.vishnu.todoapp.R;
-
-import static android.content.Context.MODE_PRIVATE;
+import phone.vishnu.todoapp.helper.SharedPreferenceHelper;
 
 public class AboutFragment extends Fragment {
 
@@ -64,11 +62,7 @@ public class AboutFragment extends Fragment {
         resetTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String FIRST_RUN_BOOLEAN = "firstRunPreference";
-
-                SharedPreferences.Editor editor = getActivity().getSharedPreferences(getActivity().getPackageName(), MODE_PRIVATE).edit();
-                editor.putBoolean(FIRST_RUN_BOOLEAN, true);
-                editor.apply();
+                new SharedPreferenceHelper(requireContext()).resetSharedPreferences();
 
                 Toast.makeText(getActivity(), "Settings Reset.....\nRestart App for changes to take effect.....", Toast.LENGTH_SHORT).show();
             }

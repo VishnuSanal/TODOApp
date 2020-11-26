@@ -10,14 +10,13 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -46,6 +44,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionDeniedResponse;
+import com.karumi.dexter.listener.PermissionGrantedResponse;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -74,10 +78,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int ADD_REQUEST_CODE = 1;
     private static final int EDIT_REQUEST_CODE = 2;
-    private static final int PERMISSION_REQ_CODE = 2222;
+
     private ShelveViewModel shelveViewModel;
     private RecyclerViewAdapter adapter;
-    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,44 +103,88 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == R.id.id_export_as_image) {
-            if (isPermissionGranted()) {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        shareScreenshot(MainActivity.this);
-                    }
-                });
-            } else {
-                isPermissionGranted();
-            }
+            Dexter.withContext(this)
+                    .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .withListener(new PermissionListener() {
+                        @Override
+                        public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                            AsyncTask.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    shareScreenshot(MainActivity.this);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
+                            showPermissionDeniedDialog();
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                            Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
+                            permissionToken.continuePermissionRequest();
+                        }
+                    })
+                    .check();
         } else if (itemId == R.id.id_about) {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance(), "About").addToBackStack(null).commit();
                 setVisibility(false);
             }
         } else if (itemId == R.id.id_export) {
-            if (isPermissionGranted()) {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        exportNotes(shelveViewModel.getAllShelves().getValue());
-                    }
-                });
-            } else {
-                isPermissionGranted();
-            }
-        } else if (itemId == R.id.id_import) {
-            if (isPermissionGranted()) {
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        importNotes();
+            Dexter.withContext(this)
+                    .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .withListener(new PermissionListener() {
+                        @Override
+                        public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                            AsyncTask.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    exportNotes(shelveViewModel.getAllShelves().getValue());
+                                }
+                            });
+                        }
 
-                    }
-                });
-            } else {
-                isPermissionGranted();
-            }
+                        @Override
+                        public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
+                            showPermissionDeniedDialog();
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                            Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
+                            permissionToken.continuePermissionRequest();
+                        }
+                    })
+                    .check();
+        } else if (itemId == R.id.id_import) {
+            Dexter.withContext(this)
+                    .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    .withListener(new PermissionListener() {
+                        @Override
+                        public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
+                            AsyncTask.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    importNotes();
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
+                            showPermissionDeniedDialog();
+                        }
+
+                        @Override
+                        public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
+                            Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
+                            permissionToken.continuePermissionRequest();
+                        }
+                    })
+                    .check();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -240,9 +287,7 @@ public class MainActivity extends AppCompatActivity {
                     Shelve shelve = new Shelve(title, description, (dueDate));
                     shelve.setId(id);
                     shelveViewModel.update(shelve);
-                    /*TODO:
-                    if (!Objects.equals(dueDate, ""))myAlarm(dueDate, title, description);
-                    else deleteReminder(shelve);*/
+
                     myAlarm(shelve);
                     Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
                 }
@@ -259,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpRecyclerView() {
-        recyclerView = findViewById(R.id.recyclerView);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
@@ -486,39 +531,27 @@ public class MainActivity extends AppCompatActivity {
         return "TODO Due On: " + dueDate;
     }
 
-    private boolean isPermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 22) {
-            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    showPermissionDeniedDialog();
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
-                }
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void showPermissionDeniedDialog() {
-
         final androidx.appcompat.app.AlertDialog.Builder builder =
-                new androidx.appcompat.app.AlertDialog.Builder(MainActivity.this, R.style.AppCompatAlertDialogStyle);
+                new androidx.appcompat.app.AlertDialog.Builder(this);
         builder.setTitle("Permission Denied");
-        builder.setMessage("Please Accept Permission to Capture Screenshot of the Screen");
+        builder.setMessage("Please Accept Necessary Permissions");
         builder.setCancelable(true);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQ_CODE);
+            public void onClick(DialogInterface imageDialog, int which) {
+                imageDialog.cancel();
+                startActivity(
+                        new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                                .setData(Uri.fromParts("package", getPackageName(), null))
+                );
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
+            public void onClick(DialogInterface imageDialog, int which) {
+                imageDialog.cancel();
+                Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
             }
         });
         builder.show();
