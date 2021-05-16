@@ -1,12 +1,13 @@
 package phone.vishnu.todoapp.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.Calendar;
 
 import phone.vishnu.todoapp.R;
+import phone.vishnu.todoapp.helper.ColorArray;
 import phone.vishnu.todoapp.model.Shelve;
 
 public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter.ShelveHolder> {
@@ -46,9 +48,22 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     @Override
     public void onBindViewHolder(@NonNull ShelveHolder holder, int position) {
         Shelve currentShelve = getItem(position);
+
+        holder.cardView.setCardBackgroundColor(getCardBGColor(position));
         holder.titleTV.setText(currentShelve.getTitle());
-        holder.descriptionTV.setText(currentShelve.getDescription());
         holder.dueTV.setText(getDueDate(currentShelve.getDateDue()));
+    }
+
+    private int getCardBGColor(int position) {
+
+        String[] colorArray = ColorArray.getColorArray200();
+
+        return Color.parseColor(colorArray[position % colorArray.length]);
+//        return Color.parseColor(colorArray[new Random().nextInt(colorArray.length - 1)]);
+    }
+
+    public Shelve getShelve(int position) {
+        return getItem(position);
     }
 
     private String getDueDate(String dueDate) {
@@ -63,10 +78,6 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
         } else return "Not Set";
     }
 
-    public Shelve getShelve(int position) {
-        return getItem(position);
-    }
-
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
@@ -76,50 +87,21 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     }
 
     class ShelveHolder extends RecyclerView.ViewHolder {
-        private final ImageView editIV;
-        private final ImageView detailsIV;
-        private final ImageView copyIV;
         private final TextView titleTV;
-        private final TextView descriptionTV;
         private final TextView dueTV;
+        private final CardView cardView;
 
         public ShelveHolder(@NonNull View itemView) {
             super(itemView);
 
             titleTV = itemView.findViewById(R.id.todoTitle);
-            descriptionTV = itemView.findViewById(R.id.todoDescription);
             dueTV = itemView.findViewById(R.id.todoDue);
+            cardView = itemView.findViewById(R.id.todoCardView);
 
-            editIV = itemView.findViewById(R.id.todoEditIV);
-            editIV.setColorFilter(R.color.colorAccent);
-            editIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
-                        listener.onItemClick(getItem(getAdapterPosition()), v.getId());
-                }
+            cardView.setOnClickListener(v -> {
+                if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
+                    listener.onItemClick(getItem(getAdapterPosition()), v.getId());
             });
-
-            detailsIV = itemView.findViewById(R.id.todoDetailsIV);
-            detailsIV.setColorFilter(R.color.colorAccent);
-            detailsIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
-                        listener.onItemClick(getItem(getAdapterPosition()), v.getId());
-                }
-            });
-
-            copyIV = itemView.findViewById(R.id.todoCopyIV);
-            copyIV.setColorFilter(R.color.colorAccent);
-            copyIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
-                        listener.onItemClick(getItem(getAdapterPosition()), v.getId());
-                }
-            });
-
         }
     }
 }

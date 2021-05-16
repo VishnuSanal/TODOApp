@@ -2,11 +2,7 @@ package phone.vishnu.todoapp.activity;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -23,7 +19,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -77,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         setUpRecyclerView();
     }
@@ -157,10 +149,8 @@ public class MainActivity extends AppCompatActivity {
     private void setVisibility(boolean makeVisible) {
         if (makeVisible) {
             Objects.requireNonNull(getSupportActionBar()).show();
-            findViewById(R.id.addMainFAB).setVisibility(View.VISIBLE);
         } else {
             Objects.requireNonNull(getSupportActionBar()).hide();
-            findViewById(R.id.addMainFAB).setVisibility(View.GONE);
         }
     }
 
@@ -279,28 +269,13 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Shelve shelve, int id) {
-                if (id == R.id.todoEditIV) {
-                    Intent i = new Intent(MainActivity.this, AddEditActivity.class);
-                    i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
-                    i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
-                    i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
-                    i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
+                Intent i = new Intent(MainActivity.this, AddEditActivity.class);
+                i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
+                i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
+                i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
+                i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
 
-                    startActivityForResult(i, EDIT_REQUEST_CODE);
-                } else if (id == R.id.todoCopyIV) {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("TODO", shelve.getTitle() + "\n" + shelve.getDescription());
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(MainActivity.this, "TODO copied to clipboard.", Toast.LENGTH_SHORT).show();
-                } else if (id == R.id.todoDetailsIV) {
-                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                            .setCancelable(true)
-                            .setTitle("Details")
-                            .setMessage(getDueDate(shelve.getDateDue()))
-                            .setPositiveButton("O.K", null)
-                            .create();
-                    dialog.show();
-                }
+                startActivityForResult(i, EDIT_REQUEST_CODE);
 
             }
         });
@@ -441,18 +416,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private String getDueDate(String dueDate) {
-        if (!dueDate.equals("")) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(Long.parseLong(dueDate.trim()));
-            dueDate = calendar.get(Calendar.HOUR_OF_DAY) + " : " +
-                    calendar.get(Calendar.MINUTE) + " - " +
-                    calendar.get(Calendar.DAY_OF_MONTH) + "/" +
-                    (calendar.get(Calendar.MONTH) + 1);
-        }
-        return "TODO Due On: " + dueDate;
     }
 
     private void showPermissionDeniedDialog() {

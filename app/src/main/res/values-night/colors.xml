@@ -12,6 +12,10 @@
 
     <color name="BGColor">#000000</color>
     <color name="BGColorLight">#D05C5C5C</color>
+
     <color name="textColor">#FFFFFF</color>
+    <color name="textColorLight">#FFFFFF</color>
+
     <color name="editTextColor">#BDBDBD</color>
+    <color name="cardBackgroundColor">#607D8B</color>
 </resources>
