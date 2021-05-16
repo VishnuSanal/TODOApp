@@ -1,7 +1,6 @@
 package phone.vishnu.todoapp.activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -10,20 +9,15 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -54,7 +47,6 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +59,6 @@ import java.util.Objects;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
 import phone.vishnu.todoapp.R;
-import phone.vishnu.todoapp.adapter.FavoritesDataAdapter;
 import phone.vishnu.todoapp.adapter.RecyclerViewAdapter;
 import phone.vishnu.todoapp.fragment.AboutFragment;
 import phone.vishnu.todoapp.model.Shelve;
@@ -102,33 +93,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.id_export_as_image) {
-            Dexter.withContext(this)
-                    .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    .withListener(new PermissionListener() {
-                        @Override
-                        public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                            AsyncTask.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    shareScreenshot(MainActivity.this);
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
-                            showPermissionDeniedDialog();
-                        }
-
-                        @Override
-                        public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                            Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
-                            permissionToken.continuePermissionRequest();
-                        }
-                    })
-                    .check();
-        } else if (itemId == R.id.id_about) {
+        if (itemId == R.id.id_about) {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance(), "About").addToBackStack(null).commit();
                 setVisibility(false);
@@ -208,54 +173,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         super.onBackPressed();
-    }
-
-    private void shareScreenshot(Context context) {
-
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-        @SuppressLint("InflateParams") View shareView = inflater.inflate(R.layout.share_layout, null);
-
-        FavoritesDataAdapter adapter = new FavoritesDataAdapter(context.getApplicationContext(), shelveViewModel.getAllShelves().getValue());
-        ((ListView) shareView.findViewById(R.id.shareListView)).setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
-        DisplayMetrics metrics = new DisplayMetrics();
-        ((WindowManager) this.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
-
-        shareView.measure(View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.EXACTLY));
-
-        shareView.setDrawingCacheEnabled(true);
-
-        Bitmap bitmap = Bitmap.createBitmap(metrics.widthPixels, metrics.heightPixels, Bitmap.Config.ARGB_8888);
-
-        Canvas c = new Canvas(bitmap);
-        shareView.layout(0, 0, metrics.widthPixels, metrics.heightPixels);
-        shareView.draw(c);
-
-        shareView.buildDrawingCache(true);
-
-        File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "TODOApp");
-        if (!root.exists()) root.mkdirs();
-        String imagePath = root.toString() + File.separator + ".Screenshot" + ".jpg";
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(imagePath);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Uri uri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", new File(imagePath));
-        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-        sharingIntent.setType("image/*");
-        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
-
-        startActivity(Intent.createChooser(sharingIntent, "Share via"));
     }
 
     @Override

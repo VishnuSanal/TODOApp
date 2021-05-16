@@ -49,5 +49,4 @@ public class ShelveViewModel extends AndroidViewModel {
 
         return allTitles;
     }
-
 }

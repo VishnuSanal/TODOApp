@@ -13,11 +13,6 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/id_export_as_image"
-        android:title="@string/export_as_image"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/id_about"
         android:title="@string/about"
         app:showAsAction="never" />

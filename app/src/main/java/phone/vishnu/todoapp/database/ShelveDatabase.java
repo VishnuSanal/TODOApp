@@ -12,12 +12,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import phone.vishnu.todoapp.dao.ShelveDao;
 import phone.vishnu.todoapp.model.Shelve;
 
-
 @Database(entities = {Shelve.class}, version = 1)
 public abstract class ShelveDatabase extends RoomDatabase {
 
     private static ShelveDatabase instance;
-    private static RoomDatabase.Callback callback = new Callback() {
+    private static final RoomDatabase.Callback callback = new Callback() {
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
@@ -41,7 +40,7 @@ public abstract class ShelveDatabase extends RoomDatabase {
     public abstract ShelveDao shelveDao();
 
     private static class PopulateDBAsyncTask extends AsyncTask<Void, Void, Void> {
-        private ShelveDao shelveDao;
+        private final ShelveDao shelveDao;
 
         public PopulateDBAsyncTask(ShelveDatabase database) {
             this.shelveDao = database.shelveDao();
