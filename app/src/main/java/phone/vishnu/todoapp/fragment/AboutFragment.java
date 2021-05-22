@@ -1,5 +1,6 @@
 package phone.vishnu.todoapp.fragment;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import phone.vishnu.todoapp.R;
 
 public class AboutFragment extends Fragment {
 
-    private TextView sourceCodeTV, feedbackTV;
+    private TextView sourceCodeTV, feedbackTV, rateTV, supportDevelopmentTV;
 
     public AboutFragment() {
     }
@@ -34,26 +35,48 @@ public class AboutFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.fragment_about, container, false);
+
         sourceCodeTV = inflate.findViewById(R.id.aboutPageViewSourceCodeTextView);
         feedbackTV = inflate.findViewById(R.id.aboutPageFeedbackTextView);
-        ((TextView) inflate.findViewById(R.id.aboutSampleVersion)).setText(String.format("Version: %s", BuildConfig.VERSION_NAME));
+        supportDevelopmentTV = inflate.findViewById(R.id.aboutPageSupportDevelopmentTextView);
+        rateTV = inflate.findViewById(R.id.aboutPageRateTextView);
+
+        ((TextView) inflate.findViewById(R.id.aboutSampleVersion)).setText(String.format("Version %s", BuildConfig.VERSION_NAME));
+
         return inflate;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sourceCodeTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Uri uriUrl = Uri.parse("https://github.com/VishnuSanal/TODOApp");
-                startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
-            }
+
+        sourceCodeTV.setOnClickListener(v -> {
+            Uri uriUrl = Uri.parse("https://github.com/VishnuSanal/TODOApp");
+            startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
         });
-        feedbackTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                composeEmail(new String[]{getActivity().getString(R.string.email_address_of_developer)}, "Feedback of " + getActivity().getString(R.string.app_name));
+
+        supportDevelopmentTV.setOnClickListener(v -> {
+            Uri uriUrl = Uri.parse("https://www.buymeacoffee.com/VishnuSanal");
+            startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
+        });
+
+        feedbackTV.setOnClickListener(v -> composeEmail(new String[]{getActivity().getString(R.string.email_address_of_developer)}, "Feedback of " + getActivity().getString(R.string.app_name)));
+
+        rateTV.setOnClickListener(v -> {
+            Uri uriUrl = Uri.parse("market://details?id=" + requireContext().getPackageName());
+            Intent intent = new Intent(Intent.ACTION_VIEW, uriUrl);
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
+                    Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
+                    Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException e) {
+                e.printStackTrace();
+                startActivity(
+                        new Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("http://play.google.com/store/apps/details?id=" + requireContext().getPackageName())));
             }
         });
     }

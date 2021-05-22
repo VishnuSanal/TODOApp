@@ -5,9 +5,16 @@
     <string name="export_todos">Export TODOs</string>
     <string name="import_todos">Import TODOs</string>
 
-    <string name="send_feedback_to_developer">Send feedback to developer</string>
-    <string name="email_address_of_developer">t.v.s10123@gmail.com</string>
-    <string name="view_source_code_at_github">View source code at GitHub</string>
     <string name="links">Links</string>
+
+    <string name="view_source_code_on_github">👨🏿‍💻 View source code on GitHub</string>
+    <string name="send_feedback_to_the_developer">📑 Send feedback to developer</string>
+    <string name="join_our_discord_server">🏠 Join our community on Discord</string>
+    <string name="support_development">💲 Donate a small amount to support development</string>
+    <string name="follow_us_on_instagram">🎨 Follow Quotes Status Creator on Instagram</string>
+    <string name="thanks_to">♥ Thanks to these awesome people</string>
+    <string name="rate_this_app_on_google_play">⭐ Rate this app on Google Play</string>
+
+    <string name="email_address_of_developer">t.v.s10123@gmail.com</string>
 
 </resources>

@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/BGColor"
-    tools:context=".fragment.AboutFragment">
+    tools:context=".fragment.AboutFragment"
+    tools:ignore="HardcodedText">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,21 +18,20 @@
             android:layout_height="36dp"
             android:layout_marginBottom="8dp"
             android:background="@color/itemTextColor"
-            android:contentDescription="About Screen Info Logo"
+            android:contentDescription="About Screen Info Icon"
             android:elevation="12dp"
             android:foregroundGravity="center"
             android:src="@drawable/ic_info"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="HardcodedText" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/aboutPageAppLogo"
+            android:id="@+id/aboutPageAppIcon"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:layout_margin="16dp"
-            android:contentDescription="@string/app_name"
+            android:contentDescription="About Screen App Icon"
             android:scaleType="fitXY"
             android:src="@drawable/ic_drawing"
             app:layout_constraintEnd_toEndOf="parent"
@@ -42,16 +42,27 @@
             android:id="@+id/aboutSampleAppNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:layout_marginTop="24dp"
-            android:fontFamily="casual"
+            android:layout_margin="8dp"
+            android:fontFamily="serif"
             android:text="@string/app_name"
-            android:textColor="@color/itemTextColor"
-            android:textSize="16sp"
+            android:textColor="@color/colorAccent"
+            android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageAppLogo" />
+            app:layout_constraintTop_toBottomOf="@id/aboutPageAppIcon" />
+
+        <TextView
+            android:id="@+id/aboutSampleVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:fontFamily="serif"
+            android:textColor="@color/textColor"
+            app:layout_constraintEnd_toEndOf="@id/aboutSampleAppNameTextView"
+            app:layout_constraintStart_toStartOf="@id/aboutSampleAppNameTextView"
+            app:layout_constraintTop_toBottomOf="@id/aboutSampleAppNameTextView"
+            tools:text="Version 2.0.0" />
 
         <View
             android:id="@+id/aboutSampleSpacerView"
@@ -62,9 +73,10 @@
             android:layout_marginEnd="1dp"
             android:layout_marginBottom="8dp"
             android:background="@color/spacerColor"
+            app:layout_constraintBottom_toTopOf="@id/aboutPageLinksTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutSampleAppNameTextView" />
+            app:layout_constraintTop_toBottomOf="@id/aboutSampleVersion" />
 
         <TextView
             android:id="@+id/aboutPageLinksTextView"
@@ -73,48 +85,76 @@
             android:layout_gravity="start"
             android:layout_margin="16dp"
             android:text="@string/links"
-            android:textColor="@color/itemTextColor"
+            android:textColor="@color/colorAccent"
             android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@id/aboutPageSupportDevelopmentTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/aboutSampleSpacerView" />
 
         <TextView
-            android:id="@+id/aboutPageFeedbackTextView"
-            android:layout_width="0dp"
+            android:id="@+id/aboutPageSupportDevelopmentTextView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:padding="16dp"
-            android:text="@string/send_feedback_to_developer"
+            android:text="@string/support_development"
             android:textColor="@color/textColor"
+            app:layout_constraintBottom_toTopOf="@id/aboutPageRateTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/aboutPageLinksTextView" />
 
         <TextView
-            android:id="@+id/aboutPageViewSourceCodeTextView"
-            android:layout_width="0dp"
+            android:id="@+id/aboutPageRateTextView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:padding="16dp"
-            android:text="@string/view_source_code_at_github"
+            android:text="@string/rate_this_app_on_google_play"
             android:textColor="@color/textColor"
+            app:layout_constraintBottom_toTopOf="@id/aboutPageViewSourceCodeTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageFeedbackTextView" />
+            app:layout_constraintTop_toBottomOf="@id/aboutPageSupportDevelopmentTextView" />
 
         <TextView
-            android:id="@+id/aboutSampleVersion"
-            android:layout_width="wrap_content"
+            android:id="@+id/aboutPageViewSourceCodeTextView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/itemTextColor"
+            android:layout_gravity="start"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="16dp"
+            android:text="@string/view_source_code_on_github"
+            android:textColor="@color/textColor"
+            app:layout_constraintBottom_toTopOf="@id/aboutPageFeedbackTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/aboutPageRateTextView" />
+
+        <TextView
+            android:id="@+id/aboutPageFeedbackTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="16dp"
+            android:text="@string/send_feedback_to_the_developer"
+            android:textColor="@color/textColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/aboutPageViewSourceCodeTextView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
