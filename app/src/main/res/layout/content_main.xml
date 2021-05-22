@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="120px"
+    android:background="@color/bottomSheetColorLight"
+    tools:ignore="HardcodedText"
+    tools:showIn="@layout/activity_main">
+
+    <TextView
+        android:id="@+id/homeAppNameTV"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/bottomSheetColorLight"
+        android:padding="16dp"
+        android:text="@string/app_name"
+        android:textColor="@color/textColorLight"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/recyclerViewEmptyHintIV"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_gravity="center"
+        android:contentDescription="Home RecyclerView Empty Hint ImageView"
+        android:src="@drawable/ic_drawing"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="@id/recyclerView"
+        app:layout_constraintStart_toStartOf="@id/recyclerView"
+        app:layout_constraintTop_toTopOf="@id/recyclerView" />
+
+    <TextView
+        android:id="@+id/recyclerViewEmptyHintTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:contentDescription="Home RecyclerView Empty Hint TextVIew"
+        android:fontFamily="casual"
+        android:text="Nothing Here!"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/recyclerViewEmptyHintIV"
+        app:layout_constraintStart_toStartOf="@id/recyclerViewEmptyHintIV"
+        app:layout_constraintTop_toBottomOf="@id/recyclerViewEmptyHintIV" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/homeAppNameTV"
+        tools:listitem="@layout/single_item" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

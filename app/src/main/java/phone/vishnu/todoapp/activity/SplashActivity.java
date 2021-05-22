@@ -28,6 +28,7 @@ public class SplashActivity extends AppCompatActivity {
         } else {
             initTasks();
         }
+//        TODO: Remove old SS
     }
 
     private void showNewTour() {

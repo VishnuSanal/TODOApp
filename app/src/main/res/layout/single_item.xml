@@ -5,7 +5,7 @@
     android:id="@+id/todoCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardBackgroundColor="@color/BGColor"
+    app:cardBackgroundColor="@color/bottomSheetColorDark"
     app:cardCornerRadius="4dp"
     app:cardElevation="4dp"
     app:cardUseCompatPadding="true">
@@ -14,6 +14,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <View
+            android:id="@+id/todoSampleColorView"
+            android:layout_width="8dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:background="@color/colorAccent" />
 
         <TextView
             android:id="@+id/todoTitle"
@@ -25,7 +34,7 @@
             app:layout_constraintBottom_toTopOf="@id/todoDue"
             app:layout_constraintEnd_toStartOf="@id/todoExpandIcon"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/todoSampleColorView"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -33,24 +42,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:textColor="@color/itemTextColor"
+            android:gravity="center_vertical"
+            android:textColor="@color/textColor"
             app:drawableStartCompat="@drawable/ic_alarm"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/todoExpandIcon"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/todoTitle" />
+            app:layout_constraintStart_toEndOf="@id/todoSampleColorView"
+            app:layout_constraintTop_toBottomOf="@id/todoTitle"
+            tools:text="Not Set" />
 
         <ImageView
             android:id="@+id/todoExpandIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="16dp"
             android:contentDescription="TODO Expand Icon"
             android:src="@drawable/ic_expand"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/BGColorLight"
+            app:tint="@color/textColor"
             tools:ignore="HardcodedText" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

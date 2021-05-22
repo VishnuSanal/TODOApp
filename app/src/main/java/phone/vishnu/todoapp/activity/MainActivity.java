@@ -1,24 +1,34 @@
 package phone.vishnu.todoapp.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.ImageView;
+import android.widget.ScrollView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -29,7 +39,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.karumi.dexter.Dexter;
@@ -62,11 +74,9 @@ import phone.vishnu.todoapp.viewmodel.ShelveViewModel;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int ADD_REQUEST_CODE = 1;
-    private static final int EDIT_REQUEST_CODE = 2;
-
     private ShelveViewModel shelveViewModel;
     private RecyclerViewAdapter adapter;
+    private BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setUpRecyclerView();
+
+        setUpBottomSheet();
     }
 
     @Override
@@ -96,12 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     .withListener(new PermissionListener() {
                         @Override
                         public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                            AsyncTask.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    exportNotes(shelveViewModel.getAllShelves().getValue());
-                                }
-                            });
+                            AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue()));
                         }
 
                         @Override
@@ -122,12 +129,7 @@ public class MainActivity extends AppCompatActivity {
                     .withListener(new PermissionListener() {
                         @Override
                         public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                            AsyncTask.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    importNotes();
-                                }
-                            });
+                            AsyncTask.execute(() -> importNotes());
                         }
 
                         @Override
@@ -156,52 +158,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED || bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            return;
+        }
+
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             for (Fragment fragment : getSupportFragmentManager().getFragments()) {
                 if (Objects.equals(fragment.getTag(), "About"))
                     setVisibility(true);
             }
         }
+
         super.onBackPressed();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && null != data) {
-            if (requestCode == ADD_REQUEST_CODE) {
-                String title = Objects.requireNonNull(data.getExtras()).getString(AddEditActivity.TITLE_EXTRA, "");
-                String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
-                String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
-
-                Shelve shelve = new Shelve(title, description, (dueDate));
-                shelveViewModel.insert(shelve);
-                myAlarm(shelve);
-//                recyclerView.scrollToPosition(0);
-
-                Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-            } else if (requestCode == EDIT_REQUEST_CODE) {
-
-                int id = Objects.requireNonNull(data.getExtras()).getInt(AddEditActivity.ID_EXTRA, -1);
-
-                if (-1 == id) {
-                    Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
-                } else {
-                    String title = data.getExtras().getString(AddEditActivity.TITLE_EXTRA, "");
-                    String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
-                    String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
-
-                    Shelve shelve = new Shelve(title, description, (dueDate));
-                    shelve.setId(id);
-                    shelveViewModel.update(shelve);
-
-                    myAlarm(shelve);
-                    Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else {
-            Toast.makeText(this, "Changes Not Saved", Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -266,19 +236,180 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attachToRecyclerView(recyclerView);
 
-        adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+        adapter.setOnItemClickListener((shelve, id) -> {
+            /*Intent i = new Intent(MainActivity.this, AddEditActivity.class);
+            i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
+            i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
+            i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
+            i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
+
+            startActivityForResult(i, EDIT_REQUEST_CODE);*/
+
+        });
+    }
+
+    private void setUpBottomSheet() {
+        final ConstraintLayout bottomSheetLayout = findViewById(R.id.bottomSheetContainer);
+
+        ScrollView scrollView = bottomSheetLayout.findViewById(R.id.bottomSheetScrollView);
+
+        TextInputEditText titleTIE = bottomSheetLayout.findViewById(R.id.addTitleTIE);
+        TextInputEditText descriptionTIE = bottomSheetLayout.findViewById(R.id.addDescriptionTIE);
+
+        Button saveButton = bottomSheetLayout.findViewById(R.id.bottomSheetButtonSave);
+        ImageView openIndicator = bottomSheetLayout.findViewById(R.id.bottomSheetOpenSampleIndicator);
+
+        TimePicker timePicker = bottomSheetLayout.findViewById(R.id.todoAddTimePicker);
+        DatePicker datePicker = bottomSheetLayout.findViewById(R.id.todoAddDatePicker);
+        SwitchCompat alarmSwitch = bottomSheetLayout.findViewById(R.id.todoAddSwitch);
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
+        bottomSheetBehavior.setPeekHeight(120);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
-            public void onItemClick(Shelve shelve, int id) {
-                Intent i = new Intent(MainActivity.this, AddEditActivity.class);
-                i.putExtra(AddEditActivity.ID_EXTRA, shelve.getId());
-                i.putExtra(AddEditActivity.TITLE_EXTRA, shelve.getTitle());
-                i.putExtra(AddEditActivity.DESCRIPTION_EXTRA, shelve.getDescription());
-                i.putExtra(AddEditActivity.DUE_DATE_EXTRA, shelve.getDateDue());
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
-                startActivityForResult(i, EDIT_REQUEST_CODE);
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    hideKeyboard(MainActivity.this);
 
+                    titleTIE.setText("");
+                    titleTIE.setError(null);
+
+                    descriptionTIE.setText("");
+                    descriptionTIE.setError(null);
+
+                    alarmSwitch.setChecked(false);
+
+                    scrollView.animate().alpha(0);
+                    saveButton.animate().alpha(0);
+
+                    openIndicator.animate().rotationBy(180);
+
+                } else if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
+
+                    final Calendar calendar = Calendar.getInstance();
+
+                    datePicker.setMinDate(calendar.getTimeInMillis());
+                    timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
+                    timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    scrollView.animate().alpha(1);
+                    saveButton.animate().alpha(1);
+
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+
+                    final Calendar calendar = Calendar.getInstance();
+
+                    datePicker.setMinDate(calendar.getTimeInMillis());
+                    timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
+                    timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    scrollView.animate().alpha(1);
+                    saveButton.animate().alpha(1);
+
+                    openIndicator.animate().rotationBy(180);
+
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                if (slideOffset > 0) {
+                    scrollView.animate().alpha(slideOffset);
+                    saveButton.animate().alpha(slideOffset);
+                }
             }
         });
+
+        alarmSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (!isChecked) {
+                timePicker.setVisibility(View.GONE);
+                datePicker.setVisibility(View.GONE);
+            } else {
+                datePicker.setVisibility(View.VISIBLE);
+                timePicker.setVisibility(View.VISIBLE);
+            }
+        });
+
+        saveButton.setOnClickListener(v -> {
+
+            String title = Objects.requireNonNull(titleTIE.getText()).toString().trim();
+            String description = Objects.requireNonNull(descriptionTIE.getText()).toString().trim();
+
+            if (!title.isEmpty() && !description.isEmpty()) {
+
+                if (!alarmSwitch.isChecked()) {
+
+                    Shelve shelve = new Shelve(title, description, "");
+                    shelveViewModel.insert(shelve);
+                    myAlarm(shelve);
+
+                } else if (alarmSwitch.isChecked()) {
+                    Calendar calendar = Calendar.getInstance();
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+                        calendar.set(Calendar.MINUTE, timePicker.getMinute());
+                    }
+
+                    calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+                    calendar.set(Calendar.MONTH, datePicker.getMonth());
+                    calendar.set(Calendar.YEAR, datePicker.getYear());
+
+                    Shelve shelve = new Shelve(title, description, String.valueOf(calendar.getTimeInMillis()));
+                    shelveViewModel.insert(shelve);
+                    myAlarm(shelve);
+                }
+
+                showSnackBar("TODO Added", null, null);
+
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+            } else {
+                if (title.isEmpty()) {
+                    titleTIE.setError("Field Empty");
+                    titleTIE.requestFocus();
+                } else {
+                    descriptionTIE.setError("Field Empty");
+                    descriptionTIE.requestFocus();
+                }
+            }
+        });
+
+        openIndicator.setOnClickListener(v -> {
+
+            if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED)
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
+            else if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HALF_EXPANDED)
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            else if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        });
+    }
+
+    private void saveTODO(String title, String description, Calendar s) {
+//                recyclerView.scrollToPosition(0);
+
+        Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+/*
+            int id = Objects.requireNonNull(data.getExtras()).getInt(AddEditActivity.ID_EXTRA, -1);
+
+            if (-1 == id) {
+                Toast.makeText(this, "Update Failed", Toast.LENGTH_SHORT).show();
+            } else {
+                String title = data.getExtras().getString(AddEditActivity.TITLE_EXTRA, "");
+                String description = data.getExtras().getString(AddEditActivity.DESCRIPTION_EXTRA, "");
+                String dueDate = data.getExtras().getString(AddEditActivity.DUE_DATE_EXTRA, "");
+
+                Shelve shelve = new Shelve(title, description, (dueDate));
+                shelve.setId(id);
+                shelveViewModel.update(shelve);
+
+                myAlarm(shelve);
+                Toast.makeText(this, "Updated", Toast.LENGTH_SHORT).show();*/
+
     }
 
     private void deleteReminder(Shelve shelve) {
@@ -334,15 +465,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showUndoSnackBar(final Shelve shelveDeleted) {
+    private void showUndoSnackBar(Shelve shelveDeleted) {
+        showSnackBar("TODO Deleted", "Undo", v -> undoDelete(shelveDeleted));
+    }
+
+    private void showSnackBar(String title, String actionButtonText, View.OnClickListener clickListener) {
         View view = findViewById(R.id.container);
-        Snackbar snackbar = Snackbar.make(view, "TODO Deleted", Snackbar.LENGTH_LONG);
-        snackbar.setAction("Undo", new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                undoDelete(shelveDeleted);
-            }
-        });
+        Snackbar snackbar = Snackbar.make(view, title, Snackbar.LENGTH_LONG);
+
+        if (actionButtonText != null && clickListener != null)
+            snackbar.setAction(actionButtonText, clickListener);
+
         snackbar.show();
     }
 
@@ -351,8 +484,15 @@ public class MainActivity extends AppCompatActivity {
         shelveViewModel.insert(shelveDeleted);
     }
 
-    public void addFABClicked(View view) {
-        startActivityForResult(new Intent(MainActivity.this, AddEditActivity.class), ADD_REQUEST_CODE);
+    public void hideKeyboard(Activity activity) {
+        InputMethodManager inputManager = (InputMethodManager) activity
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // check if no view has focus:
+        View currentFocusedView = activity.getCurrentFocus();
+        if (currentFocusedView != null) {
+            inputManager.hideSoftInputFromWindow(currentFocusedView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
     public void exportNotes(List<Shelve> shelves) {

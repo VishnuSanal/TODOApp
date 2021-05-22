@@ -11,7 +11,12 @@
     <color name="tourBackgroundColor">#F8BBD0</color>
 
     <color name="BGColor">#FFFFFF</color>
-    <color name="BGColorLight">#FFFFFF</color>
+
+    <color name="bottomSheetColorDark">#FFFFFF</color>
+    <color name="bottomSheetColorLight">#ECE4E4</color>
+
+    <!--<color name="bottomSheetColorDark">#ECE4E4</color>
+    <color name="bottomSheetColorLight">#FFFFFF</color>-->
 
     <color name="textColor">#000000</color>
     <color name="textColorLight">#D05C5C5C</color>

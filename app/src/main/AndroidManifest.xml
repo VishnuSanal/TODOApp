@@ -39,13 +39,10 @@
             </intent-filter>
             -->
         </activity>
-        <activity
-            android:name=".activity.AddEditActivity"
-            android:parentActivityName=".activity.MainActivity" />
+
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTop" />
-
 
         <provider
             android:name="androidx.core.content.FileProvider"

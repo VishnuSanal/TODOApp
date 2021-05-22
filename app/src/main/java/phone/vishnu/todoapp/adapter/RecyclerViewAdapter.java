@@ -1,6 +1,7 @@
 package phone.vishnu.todoapp.adapter;
 
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
+import java.util.Random;
 
 import phone.vishnu.todoapp.R;
 import phone.vishnu.todoapp.helper.ColorArray;
@@ -49,17 +51,17 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     public void onBindViewHolder(@NonNull ShelveHolder holder, int position) {
         Shelve currentShelve = getItem(position);
 
-        holder.cardView.setCardBackgroundColor(getCardBGColor(position));
+        holder.colorView.setBackground(new ColorDrawable(getCardBGColor(position)));
         holder.titleTV.setText(currentShelve.getTitle());
         holder.dueTV.setText(getDueDate(currentShelve.getDateDue()));
     }
 
     private int getCardBGColor(int position) {
 
-        String[] colorArray = ColorArray.getColorArray200();
+        String[] colorArray = ColorArray.getColorArray300();
 
-        return Color.parseColor(colorArray[position % colorArray.length]);
-//        return Color.parseColor(colorArray[new Random().nextInt(colorArray.length - 1)]);
+//        return Color.parseColor(colorArray[position % colorArray.length]); //TODO:
+        return Color.parseColor(colorArray[new Random().nextInt(colorArray.length - 1)]);
     }
 
     public Shelve getShelve(int position) {
@@ -90,6 +92,7 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
         private final TextView titleTV;
         private final TextView dueTV;
         private final CardView cardView;
+        private final View colorView;
 
         public ShelveHolder(@NonNull View itemView) {
             super(itemView);
@@ -97,6 +100,7 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
             titleTV = itemView.findViewById(R.id.todoTitle);
             dueTV = itemView.findViewById(R.id.todoDue);
             cardView = itemView.findViewById(R.id.todoCardView);
+            colorView = itemView.findViewById(R.id.todoSampleColorView);
 
             cardView.setOnClickListener(v -> {
                 if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)

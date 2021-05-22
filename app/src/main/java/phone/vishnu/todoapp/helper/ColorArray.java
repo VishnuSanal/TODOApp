@@ -1,29 +1,30 @@
 package phone.vishnu.todoapp.helper;
 
 public class ColorArray {
-    public static String[] getColorArray50() {
-        return new String[]{
-                "#ffebee",
-                "#fce4ec",
-                "#f3e5f5",
-                "#ede7f6",
-                "#e8eaf6",
-                "#e3f2fd",
-                "#e1f5fe",
-                "#e0f7fa",
-                "#e0f2f1",
-                "#e8f5e9",
-                "#f1f8e9",
-                "#f9fbe7",
-                "#fffde7",
-                "#fff8e1",
-                "#fff3e0",
-                "#fbe9e7",
-                "#efebe9",
-                "#fafafa",
-                "#eceff1"
-        };
-    }
+//    TODO: FIXME:
+public static String[] getColorArray50() {
+    return new String[]{
+            "#ffebee",
+            "#fce4ec",
+            "#f3e5f5",
+            "#ede7f6",
+            "#e8eaf6",
+            "#e3f2fd",
+            "#e1f5fe",
+            "#e0f7fa",
+            "#e0f2f1",
+            "#e8f5e9",
+            "#f1f8e9",
+            "#f9fbe7",
+            "#fffde7",
+            "#fff8e1",
+            "#fff3e0",
+            "#fbe9e7",
+            "#efebe9",
+            "#fafafa",
+            "#eceff1"
+    };
+}
 
     public static String[] getColorArray100() {
         return new String[]{
