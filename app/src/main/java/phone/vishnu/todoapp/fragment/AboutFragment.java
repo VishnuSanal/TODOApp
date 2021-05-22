@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,11 +14,10 @@ import androidx.fragment.app.Fragment;
 
 import phone.vishnu.todoapp.BuildConfig;
 import phone.vishnu.todoapp.R;
-import phone.vishnu.todoapp.helper.SharedPreferenceHelper;
 
 public class AboutFragment extends Fragment {
 
-    private TextView sourceCodeTV, feedbackTV, resetTV;
+    private TextView sourceCodeTV, feedbackTV;
 
     public AboutFragment() {
     }
@@ -37,7 +35,6 @@ public class AboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflate = inflater.inflate(R.layout.fragment_about, container, false);
         sourceCodeTV = inflate.findViewById(R.id.aboutPageViewSourceCodeTextView);
-        resetTV = inflate.findViewById(R.id.aboutResetSettingsButton);
         feedbackTV = inflate.findViewById(R.id.aboutPageFeedbackTextView);
         ((TextView) inflate.findViewById(R.id.aboutSampleVersion)).setText(String.format("Version: %s", BuildConfig.VERSION_NAME));
         return inflate;
@@ -57,14 +54,6 @@ public class AboutFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 composeEmail(new String[]{getActivity().getString(R.string.email_address_of_developer)}, "Feedback of " + getActivity().getString(R.string.app_name));
-            }
-        });
-        resetTV.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new SharedPreferenceHelper(requireContext()).resetSharedPreferences();
-
-                Toast.makeText(getActivity(), "Settings Reset.....\nRestart App for changes to take effect.....", Toast.LENGTH_SHORT).show();
             }
         });
     }

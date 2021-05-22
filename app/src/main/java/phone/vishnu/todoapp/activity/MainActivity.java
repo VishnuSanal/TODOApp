@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
     private DatePicker datePicker;
     private SwitchCompat alarmSwitch;
 
-    //TODO: Details
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                             .withListener(new PermissionListener() {
                                 @Override
                                 public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                                    AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue()));
+                                    AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue(), true));
                                 }
 
                                 @Override
@@ -171,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        exportNotes(shelveViewModel.getAllShelves().getValue());
+        AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue(), false));
     }
 
     @SuppressLint("SetTextI18n")
@@ -188,13 +186,22 @@ public class MainActivity extends AppCompatActivity {
 
         shelveViewModel = new ViewModelProvider(this,
                 new ViewModelProvider.AndroidViewModelFactory(getApplication())).get(ShelveViewModel.class);
+
         shelveViewModel.getAllShelves().observe(this, shelves -> {
             if (shelves.size() == 0) {
                 findViewById(R.id.recyclerViewEmptyHintIV).setVisibility(View.VISIBLE);
                 findViewById(R.id.recyclerViewEmptyHintTV).setVisibility(View.VISIBLE);
+
+                findViewById(R.id.mainContentLayout).setBackgroundColor(ContextCompat.getColor(this, R.color.BGColor));
+                findViewById(R.id.homeAppNameTV).setBackgroundColor(ContextCompat.getColor(this, R.color.BGColor));
+
             } else {
                 findViewById(R.id.recyclerViewEmptyHintIV).setVisibility(View.GONE);
                 findViewById(R.id.recyclerViewEmptyHintTV).setVisibility(View.GONE);
+
+                findViewById(R.id.mainContentLayout).setBackgroundColor(ContextCompat.getColor(this, R.color.bottomSheetColorLight));
+                findViewById(R.id.homeAppNameTV).setBackgroundColor(ContextCompat.getColor(this, R.color.bottomSheetColorLight));
+
             }
             adapter.submitList(shelves);
         });
@@ -234,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
 
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
 
-            saveButton.setText("Edit");
+            saveButton.setText("Update");
 
             String timeInMillis = shelve.getDateDue();
 
@@ -261,7 +268,6 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetTextI18n")
     private void setUpBottomSheet() {
-        //TODO: Indicator Animation
 
         ConstraintLayout bottomSheetLayout = findViewById(R.id.bottomSheetContainer);
 
@@ -531,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void exportNotes(List<Shelve> shelves) {
+    public void exportNotes(List<Shelve> shelves, boolean showSnackBar) {
         String fileName = "TODOs";
         try {
             File root = new File(Environment.getExternalStoragePublicDirectory("Documents"), "TODOs");
@@ -550,11 +556,14 @@ public class MainActivity extends AppCompatActivity {
             writer.flush();
             writer.close();
 
-            showSnackBar("TODOs Exported");
+            if (showSnackBar)
+                showSnackBar("TODOs Exported");
 
         } catch (IOException e) {
             e.printStackTrace();
-            showSnackBar("Exporting Failed");
+
+            if (showSnackBar)
+                showSnackBar("Exporting Failed");
         }
     }
 
@@ -592,6 +601,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 }
+
                 showSnackBar("TODOs Imported");
             }
         } catch (Exception e) {

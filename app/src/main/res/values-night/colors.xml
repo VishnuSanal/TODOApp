@@ -8,8 +8,6 @@
     <color name="spacerColor">#BDBDBD</color>
     <color name="redColor">#FF1100</color>
 
-    <color name="tourBackgroundColor">#F8BBD0</color>
-
     <color name="BGColor">#000000</color>
 
     <color name="bottomSheetColorDark">#000000</color>
@@ -19,5 +17,4 @@
     <color name="textColorLight">#FFFFFF</color>
 
     <color name="editTextColor">#BDBDBD</color>
-    <color name="cardBackgroundColor">#607D8B</color>
 </resources>

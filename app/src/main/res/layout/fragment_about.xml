@@ -108,61 +108,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/aboutPageFeedbackTextView" />
 
-
-        <TextView
-            android:id="@+id/aboutPageCreditsTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_margin="16dp"
-            android:text="@string/thanks_to"
-            android:textColor="@color/itemTextColor"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageViewSourceCodeTextView" />
-
-        <TextView
-            android:id="@+id/aboutPageCredit1TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:text="Aswin Kesav.U"
-            android:textColor="@color/textColor"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageCreditsTextView"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:id="@+id/aboutPageCredit2TextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:text="Vasudevan.T"
-            android:textColor="@color/textColor"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageCredit1TextView"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:id="@+id/aboutResetSettingsButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="@string/reset_settings"
-            android:textColor="@color/itemTextColor"
-            app:layout_constraintBottom_toTopOf="@id/aboutSampleVersion"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/aboutPageCredit2TextView" />
-
         <TextView
             android:id="@+id/aboutSampleVersion"
             android:layout_width="wrap_content"
