@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,7 +16,6 @@ import java.util.Calendar;
 import java.util.Random;
 
 import phone.vishnu.todoapp.R;
-import phone.vishnu.todoapp.helper.ColorArray;
 import phone.vishnu.todoapp.model.Shelve;
 
 public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter.ShelveHolder> {
@@ -51,16 +49,33 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     public void onBindViewHolder(@NonNull ShelveHolder holder, int position) {
         Shelve currentShelve = getItem(position);
 
-        holder.colorView.setBackground(new ColorDrawable(getCardBGColor(position)));
+        holder.colorView.setBackground(new ColorDrawable(getCardBGColor()));
         holder.titleTV.setText(currentShelve.getTitle());
         holder.dueTV.setText(getDueDate(currentShelve.getDateDue()));
     }
 
-    private int getCardBGColor(int position) {
+    private int getCardBGColor() {
 
-        String[] colorArray = ColorArray.getColorArray300();
+        String[] colorArray = new String[]{
+                "#e57373",
+                "#f06292",
+                "#ba68c8",
+                "#9575cd",
+                "#7986cb",
+                "#64b5f6",
+                "#4fc3f7",
+                "#4dd0e1",
+                "#4db6ac",
+                "#81c784",
+                "#aed581",
+                "#dce775",
+                "#fff176",
+                "#ffd54f",
+                "#ffb74d",
+                "#ff8a65",
+                "#a1887f"
+        };
 
-//        return Color.parseColor(colorArray[position % colorArray.length]); //TODO:
         return Color.parseColor(colorArray[new Random().nextInt(colorArray.length - 1)]);
     }
 
@@ -91,7 +106,6 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
     class ShelveHolder extends RecyclerView.ViewHolder {
         private final TextView titleTV;
         private final TextView dueTV;
-        private final CardView cardView;
         private final View colorView;
 
         public ShelveHolder(@NonNull View itemView) {
@@ -99,10 +113,9 @@ public class RecyclerViewAdapter extends ListAdapter<Shelve, RecyclerViewAdapter
 
             titleTV = itemView.findViewById(R.id.todoTitle);
             dueTV = itemView.findViewById(R.id.todoDue);
-            cardView = itemView.findViewById(R.id.todoCardView);
             colorView = itemView.findViewById(R.id.todoSampleColorView);
 
-            cardView.setOnClickListener(v -> {
+            itemView.findViewById(R.id.todoCardView).setOnClickListener(v -> {
                 if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION)
                     listener.onItemClick(getItem(getAdapterPosition()), v.getId());
             });
