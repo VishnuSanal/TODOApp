@@ -5,7 +5,7 @@
     android:id="@+id/mainContentLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="120px"
+    android:layout_marginBottom="72dp"
     android:background="@color/bottomSheetColorLight"
     tools:ignore="HardcodedText"
     tools:showIn="@layout/activity_main">
@@ -30,6 +30,7 @@
         android:id="@+id/homeMenuIV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:background="?attr/selectableItemBackground"
         android:contentDescription="Home Menu Icon"
         android:padding="8dp"

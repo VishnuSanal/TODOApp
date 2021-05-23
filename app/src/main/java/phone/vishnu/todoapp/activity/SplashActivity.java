@@ -28,12 +28,25 @@ public class SplashActivity extends AppCompatActivity {
 
             getSharedPreferences(getPackageName(), MODE_PRIVATE).edit().clear().apply();
 
-            File root = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "TODOApp");
-
-            File file = new File(root.toString() + File.separator + ".Screenshot" + ".jpg");
+            File file = new File(
+                    new File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "TODOApp").toString() +
+                            File.separator +
+                            ".Screenshot" + ".jpg"
+            );
 
             if (file != null && file.exists())
                 file.delete();
+
+            File file2 = new File(
+                    new File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "TODOs").toString() +
+                            File.separator +
+                            "TODOs" + ".txt"
+            );
+
+            if (file2 != null && file2.exists())
+                file2.delete();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,5 @@
 package phone.vishnu.todoapp.activity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -8,12 +7,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -39,26 +35,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.karumi.dexter.Dexter;
-import com.karumi.dexter.PermissionToken;
-import com.karumi.dexter.listener.PermissionDeniedResponse;
-import com.karumi.dexter.listener.PermissionGrantedResponse;
-import com.karumi.dexter.listener.PermissionRequest;
-import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
@@ -97,60 +76,23 @@ public class MainActivity extends AppCompatActivity {
         setUpBottomSheet();
 
         findViewById(R.id.homeMenuIV).setOnClickListener((v) -> {
+
             PopupMenu popup = new PopupMenu(this, v);
             popup.setOnMenuItemClickListener(item -> {
+
                 int itemId = item.getItemId();
                 if (itemId == R.id.id_about) {
                     if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                         getSupportFragmentManager().beginTransaction().add(R.id.container, AboutFragment.newInstance(), "About").addToBackStack(null).commit();
                     }
-                } else if (itemId == R.id.id_export) {
-                    Dexter.withContext(MainActivity.this)
-                            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            .withListener(new PermissionListener() {
-                                @Override
-                                public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                                    AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue(), true));
-                                }
-
-                                @Override
-                                public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
-                                    showPermissionDeniedDialog();
-                                }
-
-                                @Override
-                                public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                                    Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
-                                    permissionToken.continuePermissionRequest();
-                                }
-                            })
-                            .check();
-                } else if (itemId == R.id.id_import) {
-                    Dexter.withContext(MainActivity.this)
-                            .withPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                            .withListener(new PermissionListener() {
-                                @Override
-                                public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
-                                    AsyncTask.execute(MainActivity.this::importNotes);
-                                }
-
-                                @Override
-                                public void onPermissionDenied(final PermissionDeniedResponse permissionDeniedResponse) {
-                                    showPermissionDeniedDialog();
-                                }
-
-                                @Override
-                                public void onPermissionRationaleShouldBeShown(PermissionRequest permissionRequest, PermissionToken permissionToken) {
-                                    Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
-                                    permissionToken.continuePermissionRequest();
-                                }
-                            })
-                            .check();
                 }
+
                 return false;
             });
+
             popup.inflate(R.menu.menu_menu);
             popup.show();
+
         });
     }
 
@@ -164,12 +106,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         super.onBackPressed();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        AsyncTask.execute(() -> exportNotes(shelveViewModel.getAllShelves().getValue(), false));
     }
 
     @SuppressLint("SetTextI18n")
@@ -272,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         ConstraintLayout bottomSheetLayout = findViewById(R.id.bottomSheetContainer);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetLayout);
-        bottomSheetBehavior.setPeekHeight(120);
+        bottomSheetBehavior.setPeekHeight(DPtoPX(72));
 
         scrollView = bottomSheetLayout.findViewById(R.id.bottomSheetScrollView);
 
@@ -311,8 +247,13 @@ public class MainActivity extends AppCompatActivity {
                     final Calendar calendar = Calendar.getInstance();
 
                     datePicker.setMinDate(calendar.getTimeInMillis());
-                    timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
-                    timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    if (saveButton.getTag() == null) {
+
+                        timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
+                        timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    }
 
                     scrollView.animate().alpha(1);
                     saveButton.animate().alpha(1);
@@ -322,8 +263,13 @@ public class MainActivity extends AppCompatActivity {
                     final Calendar calendar = Calendar.getInstance();
 
                     datePicker.setMinDate(calendar.getTimeInMillis());
-                    timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
-                    timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    if (saveButton.getTag() == null) {
+
+                        timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
+                        timePicker.setMinute(calendar.get(Calendar.MINUTE));
+
+                    }
 
                     scrollView.animate().alpha(1);
                     saveButton.animate().alpha(1);
@@ -499,6 +445,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (alarmManager != null) {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Oops! Something went wrong!\nAlarm not set\nTry again", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -537,97 +486,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void exportNotes(List<Shelve> shelves, boolean showSnackBar) {
-        String fileName = "TODOs";
-        try {
-            File root = new File(Environment.getExternalStoragePublicDirectory("Documents"), "TODOs");
-            if (!root.exists()) {
-                root.mkdirs();
-            }
-            File file = new File(root, fileName);
-            FileWriter writer = new FileWriter(file + ".txt");
-
-            Gson gson = new Gson();
-
-            String json = gson.toJson(shelves);
-
-            writer.append(json);
-
-            writer.flush();
-            writer.close();
-
-            if (showSnackBar)
-                showSnackBar("TODOs Exported");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            if (showSnackBar)
-                showSnackBar("Exporting Failed");
-        }
-    }
-
-    private void importNotes() {
-        final File file = new File(Environment.getExternalStoragePublicDirectory("Documents").getAbsolutePath(), "TODOs/TODOs.txt");
-        String line = "";
-
-        try {
-            InputStream inputStream = new FileInputStream(file);
-
-            if (inputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((receiveString = bufferedReader.readLine()) != null) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                line = stringBuilder.toString();
-
-                if (line != null) {
-
-                    Gson gson = new Gson();
-                    Type type = new TypeToken<List<Shelve>>() {
-                    }.getType();
-                    List<Shelve> shelves = gson.fromJson(line, type);
-
-                    for (Shelve shelve : shelves) {
-                        Shelve s = new Shelve(shelve.getTitle(), shelve.getDescription(), shelve.getDateDue());
-                        shelveViewModel.insert(s);
-                        myAlarm(shelve);
-                    }
-
-                }
-
-                showSnackBar("TODOs Imported");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showSnackBar("Importing Failed");
-        }
-    }
-
-    private void showPermissionDeniedDialog() {
-        final androidx.appcompat.app.AlertDialog.Builder builder =
-                new androidx.appcompat.app.AlertDialog.Builder(this);
-        builder.setTitle("Permission Denied");
-        builder.setMessage("Please Accept Necessary Permissions");
-        builder.setCancelable(true);
-        builder.setPositiveButton("OK", (imageDialog, which) -> {
-            imageDialog.cancel();
-            startActivity(
-                    new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            .setData(Uri.fromParts("package", getPackageName(), null))
-            );
-        });
-        builder.setNegativeButton("Cancel", (imageDialog, which) -> {
-            imageDialog.cancel();
-            Toast.makeText(MainActivity.this, "App requires these permissions to run properly", Toast.LENGTH_SHORT).show();
-        });
-        builder.show();
-
+    private int DPtoPX(int DP) {
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        return Math.round(DP * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 }
