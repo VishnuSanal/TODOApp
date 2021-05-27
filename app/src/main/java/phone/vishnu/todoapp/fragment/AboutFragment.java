@@ -18,7 +18,7 @@ import phone.vishnu.todoapp.R;
 
 public class AboutFragment extends Fragment {
 
-    private TextView sourceCodeTV, feedbackTV, rateTV, supportDevelopmentTV;
+    private TextView sourceCodeTV, feedbackTV, rateTV;
 
     public AboutFragment() {
     }
@@ -38,7 +38,6 @@ public class AboutFragment extends Fragment {
 
         sourceCodeTV = inflate.findViewById(R.id.aboutPageViewSourceCodeTextView);
         feedbackTV = inflate.findViewById(R.id.aboutPageFeedbackTextView);
-        supportDevelopmentTV = inflate.findViewById(R.id.aboutPageSupportDevelopmentTextView);
         rateTV = inflate.findViewById(R.id.aboutPageRateTextView);
 
         ((TextView) inflate.findViewById(R.id.aboutSampleVersion)).setText(String.format("Version %s", BuildConfig.VERSION_NAME));
@@ -52,11 +51,6 @@ public class AboutFragment extends Fragment {
 
         sourceCodeTV.setOnClickListener(v -> {
             Uri uriUrl = Uri.parse("https://github.com/VishnuSanal/TODOApp");
-            startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
-        });
-
-        supportDevelopmentTV.setOnClickListener(v -> {
-            Uri uriUrl = Uri.parse("https://www.buymeacoffee.com/VishnuSanal");
             startActivity(new Intent(Intent.ACTION_VIEW, uriUrl));
         });
 

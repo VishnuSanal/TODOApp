@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -227,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
 
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+
+                    //TODO: Add Dialog
+
                     hideKeyboard(MainActivity.this);
 
                     titleTIE.setText("");
@@ -241,12 +245,15 @@ public class MainActivity extends AppCompatActivity {
                     saveButton.animate().alpha(0);
 
                     openIndicator.animate().rotationBy(180);
+                    openIndicator.requestFocus();
 
                 } else if (newState == BottomSheetBehavior.STATE_HALF_EXPANDED) {
 
                     final Calendar calendar = Calendar.getInstance();
 
                     datePicker.setMinDate(calendar.getTimeInMillis());
+
+                    timePicker.setIs24HourView(DateFormat.is24HourFormat(MainActivity.this));
 
                     if (saveButton.getTag() == null) {
 
@@ -486,6 +493,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private int DPtoPX(int DP) {
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         return Math.round(DP * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
