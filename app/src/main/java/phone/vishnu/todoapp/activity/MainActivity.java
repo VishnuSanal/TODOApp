@@ -231,6 +231,8 @@ public class MainActivity extends AppCompatActivity {
 
                     //TODO: Add Dialog
 
+                    saveButton.setTag(null);
+
                     hideKeyboard(MainActivity.this);
 
                     titleTIE.setText("");
@@ -257,6 +259,8 @@ public class MainActivity extends AppCompatActivity {
 
                     if (saveButton.getTag() == null) {
 
+                        saveButton.setText("Save");
+
                         timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
                         timePicker.setMinute(calendar.get(Calendar.MINUTE));
 
@@ -272,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
                     datePicker.setMinDate(calendar.getTimeInMillis());
 
                     if (saveButton.getTag() == null) {
+
+                        saveButton.setText("Save");
 
                         timePicker.setHour(calendar.get(Calendar.HOUR_OF_DAY) - 1);
                         timePicker.setMinute(calendar.get(Calendar.MINUTE));
