@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FabPosition
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
@@ -78,7 +79,7 @@ import kotlinx.coroutines.launch
 import phone.vishnu.todoapp.application.Application
 import phone.vishnu.todoapp.helper.AlarmHelper
 import phone.vishnu.todoapp.model.Shelve
-import phone.vishnu.todoapp.ui.theme.TODOAppTheme
+import phone.vishnu.todoapp.theme.TODOAppTheme
 import phone.vishnu.todoapp.viewmodel.MainViewModel
 import phone.vishnu.todoapp.viewmodel.MainViewModelFactory
 import java.time.Instant
@@ -125,7 +126,7 @@ class MainActivity : ComponentActivity() {
                         )
 
                     },
-                    floatingActionButtonPosition = androidx.compose.material.FabPosition.Center,
+                    floatingActionButtonPosition = FabPosition.Center,
 
                     scaffoldState = scaffoldState,
 

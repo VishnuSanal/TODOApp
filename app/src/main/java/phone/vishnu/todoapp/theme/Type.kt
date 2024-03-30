@@ -1,4 +1,4 @@
-package phone.vishnu.todoapp.ui.theme
+package phone.vishnu.todoapp.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,4 +1,4 @@
-package phone.vishnu.todoapp.ui.theme
+package phone.vishnu.todoapp.theme
 
 import android.app.Activity
 import android.os.Build
